@@ -1,0 +1,6 @@
+#!/bin/bash
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+curl -w "\n%{http_code}\n" -X GET http://127.0.0.1:${PORT}/get_address \
+-d '{"api":1,"request":{"private":false}}' \
+-H 'Content-Type: application/json'

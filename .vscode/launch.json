@@ -1,0 +1,42 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "SeedNode",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceRoot}/Bin/Debug/EMS.dll",
+            "cwd": "${workspaceRoot}/Bin",
+            "console": "externalTerminal",
+            "preLaunchTask": "build-debug",
+            "args":["--p2p-port", "3500", "--rpc-port", "4500", "--seed-node", "--log-file", "seed.log"]
+        },
+        {
+            "name": "Node-1",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceRoot}/Bin/Debug/EMS.dll",
+            "cwd": "${workspaceRoot}/Bin",
+            "console": "externalTerminal",
+            "args":["--p2p-port", "3501", "--rpc-port", "4501", "--log-file", "node1.log"]
+        },
+        {
+            "name": "Node-2",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceRoot}/Bin/Debug/EMS.dll",
+            "cwd": "${workspaceRoot}/Bin",
+            "console": "externalTerminal",
+            "args":["--p2p-port", "3502", "--rpc-port", "4502", "--log-file", "node2.log"]
+        },
+        {
+            "name": "Node-3",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceRoot}/Bin/Debug/EMS.dll",
+            "cwd": "${workspaceRoot}/Bin",
+            "console": "externalTerminal",
+            "args":["--p2p-port", "3503", "--rpc-port", "4503", "--log-file", "node4.log"]
+        }
+    ]
+}

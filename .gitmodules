@@ -1,0 +1,6 @@
+[submodule "External/AngryWasp.Net"]
+	path = External/AngryWasp.Net
+	url = https://bitbucket.org/angrywasp/angrywasp.net
+[submodule "External/AngryWasp.Cryptography"]
+	path = External/AngryWasp.Cryptography
+	url = https://bitbucket.org/angrywasp/angrywasp.cryptography

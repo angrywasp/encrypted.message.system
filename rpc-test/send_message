@@ -1,0 +1,9 @@
+#!/bin/bash
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+address=$1
+message=$2
+
+curl -w "\n%{http_code}\n" -X GET http://127.0.0.1:${PORT}/send_message \
+-d '{"api":1,"request":{"address":"'${address}'","message":"'${message}'"}}' \
+-H 'Content-Type: application/json'

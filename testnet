@@ -1,0 +1,26 @@
+#!/bin/bash
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+bin_file=${dir}/Bin/Debug/AngryWasp.P2P.Tests.dll
+
+function seed()
+{
+    dotnet ${bin_file} --seed-node --port 3500
+}
+
+function n1()
+{
+    dotnet ${bin_file} --port 3501
+}
+
+function n2()
+{
+    dotnet ${bin_file} --port 3502
+}
+
+function n3()
+{
+    dotnet ${bin_file} --port 3503
+}
+
+$1
