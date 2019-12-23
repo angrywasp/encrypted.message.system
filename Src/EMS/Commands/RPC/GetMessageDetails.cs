@@ -14,15 +14,15 @@ namespace EMS.Commands.RPC
                 ret.Response.Encrypted.Add(new EncryptedMessageItem
                 {
                     Hash = m.Key,
-                    Timestamp = m.Value.Item1
+                    Timestamp = m.Value.TimeStamp
                 });
             
             foreach (var m in MessagePool.DecryptedMessages)
                 ret.Response.Decrypted.Add(new DecryptedMessageItem
                 {
                     Hash = m.Key,
-                    Timestamp = m.Value.Item1,
-                    Sender = m.Value.Item2
+                    Timestamp = m.Value.TimeStamp,
+                    Sender = m.Value.Sender
                 });
 
             jsonResult = ret;

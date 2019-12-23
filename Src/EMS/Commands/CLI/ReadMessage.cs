@@ -20,9 +20,9 @@ namespace EMS.Commands.CLI
             var data = MessagePool.DecryptedMessages[key];
 
             Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine($"From: {data.Item2}");
-            Console.WriteLine($"Time: {DateTimeHelper.UnixTimestampToDateTime(data.Item1)}");
-            Console.WriteLine(data.Item3);
+            Console.WriteLine($"From: {data.Sender}");
+            Console.WriteLine($"Time: {DateTimeHelper.UnixTimestampToDateTime(data.TimeStamp)}");
+            Console.WriteLine(data.Message);
             Console.ForegroundColor = ConsoleColor.White;
 
             return true;

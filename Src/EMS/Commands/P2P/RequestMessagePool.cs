@@ -4,7 +4,6 @@ using AngryWasp.Net;
 
 namespace EMS.Commands.P2P
 {
-
     public class RequestMessagePool
     {
         public const byte CODE = 12;
@@ -49,7 +48,7 @@ namespace EMS.Commands.P2P
                 List<byte> bytes = new List<byte>();
                 foreach (var m in MessagePool.Messages)
                     if (!hashes.Contains(m.Key))
-                        bytes.AddRange(m.Value.Item2);
+                        bytes.AddRange(m.Value.Message);
 
                 if (bytes.Count == 0)
                     return;

@@ -4,7 +4,7 @@ Encrypted Message System (EMS) is a decentralized, peer-to-peer messaging system
 
 ## Encryption
 
-EMS creates a key ring for each user which is a collection of asymmetric encryption keys based on secp256k1 elliptic curve cryptography. the public key forms the public address that other users can use to send you a message. Messages are encrypted/decrypted with a shared key that is created with the senders private key and recipients public key. the shared key is used as a symmetric key for encrypting the message content with AES. Users are able to determine if a message belongs to them by creating their own shared key to decrypt the message.
+EMS creates a key ring for each user which is a collection of asymmetric encryption keys based on secp256k1 elliptic curve cryptography. The public key forms the public address that other users can use to send you a message. Messages are encrypted/decrypted with a shared key that is created with the senders private key and recipients public key. The shared key is used as a symmetric key for encrypting the message content with AES. Users are able to determine if a message belongs to them by creating their own shared key to decrypt the message.
 
 ## Message Format
 
@@ -32,17 +32,17 @@ The message is contructed of the following data
 
 ## Decryption
 
-As noted above, the nessage contains an `Address-XOR`. This is the product of the XOR function between the sender and receiver public key. To validate a message a potential recipient must first xor their public key with this field to obtain the senders public key. This can then be used to verify the message signature. If this message was not intended for you, the xor function will return a different key than was used to sign the message and the verification process will fail.
+As noted above, the message contains an `Address-XOR`. This is the product of the XOR function between the sender and receiver public key. To validate a message a potential recipient must first XOR their public key with this field to obtain the senders public key. This can then be used to verify the message signature. If this message was not intended for you, the XOR function will return a different key than was used to sign the message and the verification process will fail.
 
-Iof verification is successful, the senders public key (used to verify the signature) is used to created a shared key with the recipients private key. this shared key will be the same as the one used to encrypt the message and should therefore decrypt the message successfully. 
+If verification is successful, the senders public key (used to verify the signature) is used to created a shared key with the recipients private key. This shared key will be the same as the one used to encrypt the message and should therefore decrypt the message successfully. 
 
 ## Privacy Considerations
 
-To prevent tracability, messages will still be propagated after they have been successfully decrypted. this is to prevent tracing the destination of any message. All messages will continue to be propagated to and from all nodes until the message expires, at which time each node removes it from it's own local message pool.
+To prevent tracability, messages will still be propagated after they have been successfully decrypted. This is to prevent tracing the destination of any message. All messages will continue to be propagated to and from all nodes until the message expires, at which time each node removes it from it's own local message pool.
 
 Messages include a Peer ID as part of the P2P protocol header. To Prevent tracing messages from their origin, each node changes the peer ID to their own in the message header before forwarding it. This makes it so at any time in message propagation the Peer ID in the header only shows the last node it was relayed through. This also means that the same message on the network can have multiple different Peer ID values attached to it.
 
-The Address-XOR value is a source of tracability. It exists to embed a return address for a message and a key to use to verify the message signature. sending with the same address to the same address will result in this field being the same and messages can be easily traced. Therefore every outgoing message should use a new address to change the value of the `address-xor` field. Future work will enforce this at the application level by automatically generating a new single use address for every outgoing message.
+The Address-XOR value is a source of tracability. It exists to embed a return address for a message and a key to use to verify the message signature. Sending with the same address to the same address will result in this field being the same and allow onlookers to be able to see the number of messages being exchanged between two parties. Therefore outgoing messages should use a new return address to change the value of the `Address-XOR` field on a regular basis, preferably with each new message for maximum security. Future work will enforce this at the application level by automatically generating a new single use address for every outgoing message.
 
 ## TODO
 

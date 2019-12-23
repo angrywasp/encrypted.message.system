@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Text;
 using AngryWasp.Cryptography;
@@ -8,14 +7,53 @@ using EMS.Commands.P2P;
 
 namespace EMS
 {
+    public class MessagePoolItem
+    {
+        private ulong timestamp;
+        private byte[] message;
+        private bool markedRead;
+
+        public ulong TimeStamp => timestamp;
+
+        public byte[] Message => message;
+
+        public bool MarkedRead => markedRead;
+
+        public MessagePoolItem(ulong ts, byte[] m)
+        {
+            timestamp = ts;
+            message = m;
+        }
+    }
+
+    public class DecryptedMessagePoolItem
+    {
+        private ulong timestamp;
+        private string sender;
+        private string message;
+
+        public ulong TimeStamp => timestamp;
+
+        public string Sender => sender;
+
+        public string Message => message;
+
+        public DecryptedMessagePoolItem(ulong ts, string s, string m)
+        {
+            timestamp = ts;
+            sender = s;
+            message = m;
+        }
+    }
+
     public static class MessagePool
     {
-        private static Dictionary<HashKey, Tuple<ulong, byte[]>> messages = new Dictionary<HashKey, Tuple<ulong, byte[]>>();
-        private static Dictionary<HashKey, Tuple<ulong, string, string>> decryptedMessages = new Dictionary<HashKey, Tuple<ulong, string, string>>();
+        private static Dictionary<HashKey, MessagePoolItem> messages = new Dictionary<HashKey, MessagePoolItem>();
+        private static Dictionary<HashKey, DecryptedMessagePoolItem> decryptedMessages = new Dictionary<HashKey, DecryptedMessagePoolItem>();
 
-        public static Dictionary<HashKey, Tuple<ulong, byte[]>> Messages => messages;
+        public static Dictionary<HashKey, MessagePoolItem> Messages => messages;
 
-        public static Dictionary<HashKey, Tuple<ulong, string, string>> DecryptedMessages => decryptedMessages;
+        public static Dictionary<HashKey, DecryptedMessagePoolItem> DecryptedMessages => decryptedMessages;
 
         public static int Count => messages.Count;
 
@@ -57,9 +95,9 @@ namespace EMS
             byte[] msg = KeyRing.DecryptMessage(message, 8, out sender);
 
             if (msg != null)
-                decryptedMessages.Add(key, new Tuple<ulong, string, string>(timestamp, sender, Encoding.ASCII.GetString(msg)));
+                decryptedMessages.Add(key, new DecryptedMessagePoolItem(timestamp, sender, Encoding.ASCII.GetString(msg)));
 
-            messages.Add(key, new Tuple<ulong, byte[]>(timestamp, message));
+            messages.Add(key, new MessagePoolItem(timestamp, message));
             return key;
         }
     }

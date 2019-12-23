@@ -17,7 +17,7 @@ namespace EMS.Commands.CLI
             foreach (var m in MessagePool.Messages)
             {
                 Console.WriteLine($"  Hash: {m.Key}");
-                Console.WriteLine($"  Time: {DateTimeHelper.UnixTimestampToDateTime(m.Value.Item1)}");
+                Console.WriteLine($"  Time: {DateTimeHelper.UnixTimestampToDateTime(m.Value.TimeStamp)}");
                 Console.WriteLine();
 
                 ++count;
@@ -39,8 +39,8 @@ namespace EMS.Commands.CLI
             foreach (var m in MessagePool.DecryptedMessages)
             {
                 Console.WriteLine($"  Hash: {m.Key}");
-                Console.WriteLine($"  Time: {DateTimeHelper.UnixTimestampToDateTime(m.Value.Item1)}");
-                Console.WriteLine($"Sender: {m.Value.Item2}");
+                Console.WriteLine($"  Time: {DateTimeHelper.UnixTimestampToDateTime(m.Value.TimeStamp)}");
+                Console.WriteLine($"Sender: {m.Value.Sender}");
                 Console.WriteLine();
                 ++count;
             }
