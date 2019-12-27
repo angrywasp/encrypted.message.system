@@ -58,7 +58,7 @@ namespace EMS
 
 		public static string EncodeWithCheckSum(byte[] data) => Encode(AddCheckSum(data));
 
-		public static byte[] Decode(string s)
+		public static bool Decode(string s, out byte[] result)
 		{
 			// Decode Base58 string to BigInteger 
 			BigInteger intData = 0;
@@ -66,7 +66,10 @@ namespace EMS
 			{
 				int digit = Digits.IndexOf(s[i]); //Slow
 				if (digit < 0)
-					throw new FormatException(string.Format("Invalid Base58 character `{0}` at position {1}", s[i], i));
+				{
+					result = null;
+					return false;
+				}
 				intData = intData * 58 + digit;
 			}
 
@@ -78,17 +81,20 @@ namespace EMS
 				intData.ToByteArray()
 				.Reverse()// to big endian
 				.SkipWhile(b => b == 0);//strip sign byte
-			var result = leadingZeros.Concat(bytesWithoutLeadingZeros).ToArray();
-			return result;
+			result = leadingZeros.Concat(bytesWithoutLeadingZeros).ToArray();
+			return true;
 		}
 
-		public static byte[] DecodeWithCheckSum(string s)
+		public static bool DecodeWithCheckSum(string s, out byte[] result)
 		{
-			var dataWithCheckSum = Decode(s);
-			var dataWithoutCheckSum = VerifyAndRemoveCheckSum(dataWithCheckSum);
-			if (dataWithoutCheckSum == null)
-				throw new FormatException("Base58 checksum is invalid");
-			return dataWithoutCheckSum;
+			if (!Decode(s, out result))
+				return false;
+
+			result = VerifyAndRemoveCheckSum(result);
+			if (result == null)
+				return false;
+
+			return true;
 		}
 
 		private static byte[] GetCheckSum(byte[] data)
