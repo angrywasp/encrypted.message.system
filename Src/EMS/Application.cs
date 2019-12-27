@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using AngryWasp.Helpers;
+using AngryWasp.Logger;
 
 namespace EMS
 {
@@ -10,27 +10,62 @@ namespace EMS
     {
         public delegate bool CliFunc<T>(T arg);
 
-        private static Dictionary<string, CliFunc<string[]>> commands = new Dictionary<string, CliFunc<string[]>>();
+        private static Dictionary<string, Tuple<string, CliFunc<string[]>>> commands = new Dictionary<string, Tuple<string, CliFunc<string[]>>>();
 
-        public static void RegisterCommand(string key, CliFunc<string[]> value)
+        public static Dictionary<string, Tuple<string, CliFunc<string[]>>> Commands => commands;
+
+        public static void RegisterCommand(string key, string helpText, CliFunc<string[]> handler)
         {
             if (!commands.ContainsKey(key))
-                commands.Add(key, value);
+                commands.Add(key, new Tuple<string, CliFunc<string[]>>(helpText, handler));
         }
 
         public static void Start()
         {
-            Thread t = new Thread(new ThreadStart( () =>
+            Log.Instance.RemoveWriter("console");
+            bool noPrompt = false;
+            List<char> enteredText = new List<char>();
+            Queue<Tuple<ConsoleColor, string>> buffer = new Queue<Tuple<ConsoleColor, string>>();
+
+            Thread t0 = new Thread(new ThreadStart( () =>
+            {
+                BufferedLogWriter blr = new BufferedLogWriter(buffer);
+                Log.Instance.AddWriter("buffered", blr, true);
+
+                while(true)
+                {
+                    Tuple<ConsoleColor, string> i = null;
+                    if (!blr.Buffer.TryDequeue(out i))
+                    {
+                        Thread.Sleep(50);
+                        continue;
+                    }
+                    Console.CursorLeft = 0;
+                    Console.ForegroundColor = i.Item1;
+                    Console.Write(new string(' ', Console.WindowWidth));
+                    Console.CursorLeft = 0;
+                    Console.WriteLine(i.Item2);
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write("> ");
+                    Console.Write(new string(enteredText.ToArray()));
+                }
+            }));
+
+            Thread t1 = new Thread(new ThreadStart( () =>
             {
                 List<string> lines = new List<string>();
                 int lineIndex = 0, lastLineIndex = 0;
-                bool noPrompt = false;
-                List<char> enteredText = new List<char>();
-
+                
                 while (true)
                 {
                     if (!noPrompt)
                         Console.Write("> ");
+
+                    if (!Console.KeyAvailable)
+                    {
+                        noPrompt = true;
+                        continue;
+                    }
 
                     var key = Console.ReadKey();
                     noPrompt = false;
@@ -110,7 +145,7 @@ namespace EMS
                         {
                             if (commands.ContainsKey(args[0]))
                             {
-                                if (!commands[args[0]].Invoke(args))
+                                if (!commands[args[0]].Item2.Invoke(args))
                                     Console.WriteLine("Command failed");
                             }
                         }
@@ -129,8 +164,10 @@ namespace EMS
                 }
             }));
 
-            t.Start();
-            t.Join();
+            t0.Start();
+            t1.Start();
+            t0.Join();
+            t1.Join();
         }
     }
 }
