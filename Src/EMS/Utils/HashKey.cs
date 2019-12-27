@@ -25,6 +25,17 @@ namespace EMS
 
         public static readonly HashKey Empty = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
+        public bool IsNullOrEmpty()
+        {
+            if (value == null)
+                return true;
+
+            if (value.SequenceEqual(Empty))
+                return true;
+
+            return false;
+        }
+
         public HashKey(byte[] bytes)
         {
             value = bytes;
