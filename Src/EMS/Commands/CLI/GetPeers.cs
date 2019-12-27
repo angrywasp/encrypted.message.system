@@ -7,6 +7,9 @@ namespace EMS.Commands.CLI
     {
         public static bool Handle(string[] cmd)
         {
+            
+#region Incoming
+
             Console.ForegroundColor = ConsoleColor.DarkGreen;
 
             Console.WriteLine("Incoming:");
@@ -16,7 +19,7 @@ namespace EMS.Commands.CLI
             int count = 0;
             ConnectionManager.ForEach(Direction.Incoming, (c) =>
             {
-                Console.WriteLine($"{c.PeerId} - {c.Address}:{c.Port}");
+                Console.WriteLine($"{c.PeerId} - {c.Address.MapToIPv4()}:{c.Port}");
                 ++count;
             });
 
@@ -26,7 +29,11 @@ namespace EMS.Commands.CLI
                 Console.WriteLine("None");
             }
 
+#endregion
+
             Console.WriteLine();
+
+#region Outgoing
 
             Console.ForegroundColor = ConsoleColor.DarkGreen;
 
@@ -37,7 +44,7 @@ namespace EMS.Commands.CLI
             count = 0;
             ConnectionManager.ForEach(Direction.Outgoing, (c) =>
             {
-                Console.WriteLine($"{c.PeerId} - {c.Address}:{c.Port}");
+                Console.WriteLine($"{c.PeerId} - {c.Address.MapToIPv4()}:{c.Port}");
                 ++count;
             });
 
@@ -47,6 +54,9 @@ namespace EMS.Commands.CLI
                 Console.WriteLine("None");
             }
 
+#endregion
+
+            Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
 
             return true;
