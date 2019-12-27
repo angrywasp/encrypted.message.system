@@ -51,9 +51,9 @@ namespace EMS
         public const uint API_LEVEL = 1;
         HttpListener listener;
 
-        private int port = 0;
+        private ushort port = 0;
 
-        public int Port => port;
+        public ushort Port => port;
 
         public delegate bool RpcFunc<T, U>(T args, out U value);
 
@@ -65,7 +65,7 @@ namespace EMS
                 commands.Add(key, new Tuple<Type, RpcFunc<object, object>>(typeof(JsonRequest<T>), value));
         }
 
-        public void Start(int port, int sslPort)
+        public void Start(ushort port, ushort sslPort)
         {
             this.port = port;
             listener = new HttpListener();
