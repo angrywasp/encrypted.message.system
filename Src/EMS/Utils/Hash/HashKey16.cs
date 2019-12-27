@@ -6,7 +6,7 @@ using AngryWasp.Helpers;
 
 namespace EMS
 {
-    public struct HashKey : IReadOnlyList<byte>, IEquatable<HashKey>, IEquatable<byte[]>
+    public struct HashKey16 : IReadOnlyList<byte>, IEquatable<HashKey16>, IEquatable<byte[]>
     {
         private readonly byte[] value;
 
@@ -23,7 +23,7 @@ namespace EMS
 
         public int Count => 16;
 
-        public static readonly HashKey Empty = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        public static readonly HashKey16 Empty = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
         public bool IsNullOrEmpty()
         {
@@ -36,12 +36,12 @@ namespace EMS
             return false;
         }
 
-        public HashKey(byte[] bytes)
+        public HashKey16(byte[] bytes)
         {
             value = bytes;
         }
 
-        public bool Equals(HashKey other) => this.SequenceEqual(other);
+        public bool Equals(HashKey16 other) => this.SequenceEqual(other);
 
         public bool Equals(byte[] other) => this.SequenceEqual(other);
 
@@ -50,7 +50,7 @@ namespace EMS
             if (ReferenceEquals(null, obj))
                 return false;
 
-            return obj is HashKey && this.Equals((HashKey)obj);
+            return obj is HashKey16 && this.Equals((HashKey16)obj);
         }
 
         public IEnumerator<byte> GetEnumerator()
@@ -76,23 +76,23 @@ namespace EMS
                 BitShifter.ToInt(this.value, ref offset);
         }
 
-        public static bool operator ==(HashKey left, HashKey right) => left.Equals(right);
+        public static bool operator ==(HashKey16 left, HashKey16 right) => left.Equals(right);
 
-        public static bool operator !=(HashKey left, HashKey right) => !left.Equals(right);
+        public static bool operator !=(HashKey16 left, HashKey16 right) => !left.Equals(right);
 
-        public static bool operator ==(byte[] left, HashKey right) => right.Equals(left);
+        public static bool operator ==(byte[] left, HashKey16 right) => right.Equals(left);
 
-        public static bool operator !=(byte[] left, HashKey right) => !right.Equals(left);
+        public static bool operator !=(byte[] left, HashKey16 right) => !right.Equals(left);
 
-        public static bool operator ==(HashKey left, byte[] right) => left.Equals(right);
+        public static bool operator ==(HashKey16 left, byte[] right) => left.Equals(right);
 
-        public static bool operator !=(HashKey left, byte[] right) => !left.Equals(right);
+        public static bool operator !=(HashKey16 left, byte[] right) => !left.Equals(right);
 
-        public static implicit operator HashKey(byte[] value) => new HashKey(value);
+        public static implicit operator HashKey16(byte[] value) => new HashKey16(value);
 
-        public static implicit operator byte[](HashKey value) => value;
+        public static implicit operator byte[](HashKey16 value) => value;
 
-        public static implicit operator HashKey(List<byte> value) => new HashKey(value.ToArray());
+        public static implicit operator HashKey16(List<byte> value) => new HashKey16(value.ToArray());
 
         public override string ToString() => value.ToHex();
 
