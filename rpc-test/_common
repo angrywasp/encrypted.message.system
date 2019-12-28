@@ -1,0 +1,63 @@
+#!/bin/bash
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+function check_http_status()
+{
+    #check error code
+    if [ $1 != 200 ]; then
+        echo "Bad request"
+        exit
+    fi
+}
+
+function print_request_data()
+{
+    req='{"api":1,"request":'$1'}'
+
+    echo "==========================================="
+    echo "Request"
+    echo "-------------------------------------------"
+    echo ${req} | jq .
+}
+
+function print_request_data_no_param()
+{
+    req='{"api":1}'
+
+    echo "==========================================="
+    echo "Request"
+    echo "-------------------------------------------"
+    echo ${req} | jq .
+}
+
+function print_response_data()
+{
+    echo "==========================================="
+    echo "Response"
+    echo "-------------------------------------------"
+    echo $1 | jq .
+}
+
+function send_request()
+{
+    
+    data=$(curl -s -w " %{http_code}" -X GET http://127.0.0.1:${PORT}/$1 \
+    -d '{"api":1,"request":'$2'}' \
+    -H 'Content-Type: application/json')
+
+    data=(${data[@]})
+    check_http_status ${data[1]}
+    echo ${data[0]}
+}
+
+function send_request_no_param()
+{
+    
+    data=$(curl -s -w " %{http_code}" -X GET http://127.0.0.1:${PORT}/$1 \
+    -d '{"api":1}' \
+    -H 'Content-Type: application/json')
+
+    data=(${data[@]})
+    check_http_status ${data[1]}
+    echo ${data[0]}
+}

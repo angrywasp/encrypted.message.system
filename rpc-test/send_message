@@ -1,9 +1,14 @@
 #!/bin/bash
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source ${dir}/_common
 
 address=$1
-message=$2
+message=$(echo "$2" | tr -d '"' | base64)
 
-curl -w "\n%{http_code}\n" -X GET http://127.0.0.1:${PORT}/send_message \
--d '{"api":1,"request":{"address":"'${address}'","message":"'${message}'"}}' \
--H 'Content-Type: application/json'
+request='{"address":"'${address}'","message":"'${message}'"}'
+
+data=$(send_request send_message ${request})
+
+print_request_data ${request}
+echo ""
+print_response_data ${data}

@@ -6,13 +6,9 @@
         {
             "label": "build-debug",
             "type": "shell",
-            "command": "msbuild",
+            "command": "dotnet",
             "args": [
-                // Ask msbuild to generate full paths for file names.
-                "/property:GenerateFullPaths=true",
-                "/t:build",
-                "/property:Configuration=Debug",
-                "/property:TrimUnusedDependencies=true"
+                "build", "-c", "debug", "/p:GenerateFullPaths=true"
             ],
             "group": "build",
             "presentation": {
