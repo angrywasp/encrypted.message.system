@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using AngryWasp.Logger;
 
-namespace AngryWasp.Logger
+namespace EMS
 {
     public class BufferedLogWriter : ILogWriter
     {
-        Queue<Tuple<ConsoleColor, string>> buffer;
+        List<Tuple<ConsoleColor, string>> buffer;
 
         private ConsoleColor color = ConsoleColor.White;
 
-        public Queue<Tuple<ConsoleColor, string>> Buffer => buffer;
+        public List<Tuple<ConsoleColor, string>> Buffer => buffer;
 
         public void SetColor(ConsoleColor color)
         {
             this.color = color;
         }
 
-        public BufferedLogWriter(Queue<Tuple<ConsoleColor, string>> buffer)
+        public BufferedLogWriter(List<Tuple<ConsoleColor, string>> buffer)
         {
             this.buffer = buffer;
         }
@@ -27,6 +28,10 @@ namespace AngryWasp.Logger
 
         public void Write(Log_Severity severity, string value)
         {
+            //do not clutter console with info messages
+            if (severity == Log_Severity.Info)
+                return;
+
             ConsoleColor msgColor = color;
 
             switch (severity)
@@ -40,12 +45,12 @@ namespace AngryWasp.Logger
                 case Log_Severity.Warning:
                     msgColor = ConsoleColor.Yellow;
                     break;
-                default: //Info and None
+                default:
                     msgColor = color;
                     break;
             }
 
-            buffer.Enqueue(new Tuple<ConsoleColor, string>(msgColor, value));
+            buffer.Add(new Tuple<ConsoleColor, string>(msgColor, value));
         }
     }
 }
