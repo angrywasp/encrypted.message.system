@@ -20,8 +20,6 @@ The status field is either `OK` or `ERROR` depending on success or failure of th
 Below is a list of the available RPC functions and an example of making the RPC request in bash and expected response. Examples bash scripts are also contained in `./rpc-test`.  
 Examples assume that the node is started with `--rpc-port 5000`
 
-<hr/>
-
 ## **get_address**
 
 Returns the address currently in use by the node. [Bash example](./rpc-test/get_address)
@@ -39,18 +37,18 @@ Returns the address currently in use by the node. [Bash example](./rpc-test/get_
 }
 ```
 
-Input:  
+**Input:**  
+
 - `private`: Should the response include the private keys?
 
-Output:  
+**Output:**  
+
 - `public`: Base58 encoded public key. This is the address people use to send you messages.  
 - `public_hex`: Hex representation of the public key.  
 - `private`: Base58 encoded private key. This is required to restore your address.  
 - `private_hex`: Hex representation of the private key.  
 
 *Note: if `private` is set to false in the request, both `private` and `private_hex` response fields will be `null`*
-
-<hr/>
 
 ## **get_message_count**
 
@@ -69,14 +67,14 @@ Returns a count of the messages in the pool. [Bash example](./rpc-test/get_messa
 ```
 
 **Input:**  
+
 - None
 
 **Output:**    
+
 - `encrypted`: The number of messages in the encrypted message pool.  
 - `incoming`: The number of incoming messages. i.e. The number of messages you have received.  
 - `outgoing`: The number of outgoing messages. i.e. The number of messages you have sent.
-
-<hr/>
 
 ## **get_message_details**
 
@@ -112,9 +110,11 @@ Gets basic details of messages in the pool
 ```
 
 **Input:**  
+
 - None
 
 **Output:**  
+
 - `encrypted`: An array of encrypted messages in the pool.   
     - `hash`: The hash of the message.  
 - `incoming`: An array of incoming message items.    
@@ -123,8 +123,6 @@ Gets basic details of messages in the pool
 - `outgoing`: An array of outgoing message items.  
     - `hash`: The hash of the message.
     - `recipient`: The address you sent the message to.  
-
-<hr/>
 
 ## **get_message**
 
@@ -144,9 +142,11 @@ Retrieves a message to read. [Bash example](./rpc-test/get_message)
 ```
 
 **Input:**  
+
 - `key`: The hash key of the message you want to read. Obtained with the `get_message_details` RPC endpoint
 
 **Output:**  
+
 - `incoming`: Flag indicating if this is an incoming or outgoing message.  
 - `timestamp`: The Unix timestamp of the time the message was created.  
 - `destination`: The address that authored the message. 
@@ -155,8 +155,6 @@ Retrieves a message to read. [Bash example](./rpc-test/get_message)
 *NOTE: The [get_message](./rpc-test/get_message) function returns a base64 encoded string. The test script demonstrates the process.*  
 
 *NOTE: destination changes depending on the `incoming` flag. If true, `destination` is the address that sent you the message. If false, it is your address.*
-
-<hr/>
 
 ## **send_message**
 
@@ -173,10 +171,12 @@ Send a message to another user. [Bash example](./rpc-test/send_message)
 ```
 
 **Input:**  
-- `address`: The address to send the message to.
+
+- `address`: The address to send the message to.  
 - `message`: The message to send.
 
 **Output:**  
+
 - `key`: The hash key of the newly created message.  
 
 *NOTE: The [send_message](./rpc-test/send_message) function expects the message data a base64 encoded string. The test script demonstrates the process.*
