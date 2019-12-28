@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using AngryWasp.Cryptography;
 using AngryWasp.Helpers;
 
 namespace EMS
@@ -44,6 +45,8 @@ namespace EMS
         {
             value = bytes;
         }
+
+        public static HashKey32 Make(byte[] input) => Keccak.Hash256(input);
 
         public bool Equals(HashKey32 other) => this.SequenceEqual(other);
 
