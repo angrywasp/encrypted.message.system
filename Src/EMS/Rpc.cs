@@ -1,7 +1,5 @@
 using System.Text;
 using System.Net;
-using AngryWasp.Logger;
-using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using System.IO;
 using System.Collections.Generic;
@@ -74,8 +72,9 @@ namespace EMS
             //todo: do we need authentication?
             listener.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
             listener.Start();
-            Log.Instance.Write($"Local RPC endpoint on port {port} ({sslPort} SSL)");
-            Log.Instance.Write("RPC server initialized");
+            Log.WriteInfo($"Local RPC endpoint on port {port} ({sslPort} SSL)");
+            Log.WriteConsole($"Local RPC endpoint on port {port} ({sslPort} SSL)");
+            Log.WriteInfo("RPC server initialized");
 
             Task.Run(() =>
             {
@@ -107,15 +106,23 @@ namespace EMS
 
             if (commands.ContainsKey(method))
             {
-                object deserializedRequest = JsonConvert.DeserializeObject(text, commands[method].Item1);
+                try
+                {
+                    object deserializedRequest = JsonConvert.DeserializeObject(text, commands[method].Item1);
 
-                if (((JsonRequestBase)deserializedRequest).ApiLevel < API_LEVEL)
+                    if (((JsonRequestBase)deserializedRequest).ApiLevel < API_LEVEL)
+                    {
+                        resultData = new JsonResponse<string>() {
+                            Response = "API level is insufficient" };
+                    }
+                    else
+                        ok = commands[method].Item2.Invoke(deserializedRequest, out resultData);
+                }
+                catch
                 {
                     resultData = new JsonResponse<string>() {
-                        Response = "API level is insufficient" };
+                        Response = "Exception in RPC request"};
                 }
-                else
-                    ok = commands[method].Item2.Invoke(deserializedRequest, out resultData);
             }
             else
             {

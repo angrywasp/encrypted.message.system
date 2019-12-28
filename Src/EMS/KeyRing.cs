@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using AngryWasp.Cryptography;
 using AngryWasp.Helpers;
-using AngryWasp.Logger;
+using System.Linq;
+using System.Text;
 
 namespace EMS
 {
@@ -15,23 +16,46 @@ namespace EMS
         public static byte[] PrivateKey => privateKey;
         public static byte[] PublicKey => publicKey;
 
-        public static void Initialize()
+        public static void LoadFromFile(string path)
         {
-            Ecc.GenerateKeyPair(out publicKey, out privateKey);
-            Log.Instance.Write($"Address - {Base58.Encode(publicKey)}");
+            if (string.IsNullOrEmpty(path))
+                Ecc.GenerateKeyPair(out publicKey, out privateKey);
+            else
+            {
+                if (File.Exists(path))
+                {
+                    privateKey = File.ReadAllBytes(path);
+                    publicKey = Ecc.GetPublicKeyFromPrivateKey(privateKey);
+                }
+                else
+                {
+                    Ecc.GenerateKeyPair(out publicKey, out privateKey);
+                    File.WriteAllBytes(path, privateKey);
+                }
+            }
+
+            Log.WriteConsole($"Address - {Base58.Encode(publicKey)}");
         }
 
         public static byte[] CreateSharedKey(byte[] recipientPublicKey) => Ecc.CreateKeyAgreement(privateKey, recipientPublicKey);
 
-        //we xor the recipients public key with our own
-        //then when the message is sent, the other party can xor the data with their own public key
-        //to derive the key of the sender and construct the shared secret to verify the signature and
-        //decrypt the message
-
-        public static byte[] EncryptMessage(byte[] input, string base58RecipientAddress)
+        public static bool EncryptMessage(byte[] input, string base58RecipientAddress, out byte[] result)
         {
-            byte[] to = Base58.Decode(base58RecipientAddress);
+            byte[] to;
+            result = null;
+            if (!Base58.Decode(base58RecipientAddress, out to))
+            {
+                Log.WriteWarning("Address is invalid");
+                return false;
+            }
+
             byte[] sharedKey = CreateSharedKey(to);
+
+            if (sharedKey == null)
+            {
+                Log.WriteWarning("Address is invalid");
+                return false;
+            }
 
             BitArray a = new BitArray(publicKey);
             BitArray b = new BitArray(to);
@@ -43,41 +67,56 @@ namespace EMS
             byte[] encrypted = Aes.Encrypt(input, sharedKey);
             byte[] sig = Ecc.Sign(encrypted, privateKey);
             List<byte> msg = new List<byte>();
+
             msg.AddRange(BitShifter.ToByte((ushort)sig.Length));
             msg.AddRange(BitShifter.ToByte((ushort)encrypted.Length));
+
+            byte[] readProofKey = input.Skip(8).Take(16).ToArray();
+
             msg.AddRange(key);
+            msg.AddRange(ProvableMessage.GenerateHash(readProofKey));
+
             msg.AddRange(sig);
             msg.AddRange(encrypted);
 
-            return msg.ToArray();
+            result = msg.ToArray();
+            return true;
         }
         
-
-        public static byte[] DecryptMessage(byte[] input, int inputOffset, out string address)
+        public static bool DecryptMessage(byte[] input, out IncomingMessage result)
         {
+            result = null;
             BinaryReader reader = new BinaryReader(new MemoryStream(input));
-            reader.BaseStream.Seek(inputOffset, SeekOrigin.Begin);
+            reader.BaseStream.Seek(0, SeekOrigin.Begin);
 
             ushort sigLen = BitShifter.ToUShort(reader.ReadBytes(2));
             ushort encLen = BitShifter.ToUShort(reader.ReadBytes(2));
             byte[] xorKey = reader.ReadBytes(65);
+            HashKey32 proofHash = reader.ReadBytes(32);
             byte[] a = new byte[65];
 
             BitArray ba = new BitArray(publicKey);
             BitArray bb = new BitArray(xorKey);
             ba.Xor(bb);
             ba.CopyTo(a, 0);
-            address = Base58.Encode(a);
+            string address = Base58.Encode(a);
 
             byte[] sig = reader.ReadBytes(sigLen);
             byte[] enc = reader.ReadBytes(encLen);
 
             if (!Ecc.Verify(enc, a, sig))
-                return null;
+                return false;
 
             byte[] sharedKey = CreateSharedKey(a);
+            byte[] decrypted = Aes.Decrypt(enc, sharedKey);
 
-            return Aes.Decrypt(enc, sharedKey);
+            ulong ts = BitShifter.ToULong(decrypted);
+            HashKey16 proofNonce = decrypted.Skip(8).Take(16).ToArray();
+            string msg = Encoding.ASCII.GetString(decrypted.Skip(24).ToArray());
+
+            result = new IncomingMessage(ts, address, msg);
+            result.SetReadProof(proofNonce, proofHash);
+            return true;
         }
     }
 }

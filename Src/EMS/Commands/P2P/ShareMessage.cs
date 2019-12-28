@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using AngryWasp.Helpers;
+using AngryWasp.Cryptography;
 using AngryWasp.Net;
 
 namespace EMS.Commands.P2P
@@ -8,37 +8,36 @@ namespace EMS.Commands.P2P
     {
         public const byte CODE = 11;
 
-        public static byte[] GenerateRequest(bool isRequest, ulong timestamp, byte[] message)
-        {
-            List<byte> data = new List<byte>();
-            data.AddRange(Header.Create(CODE, isRequest, (ushort)(message.Length + 8)));
-            data.AddRange(BitShifter.ToByte(timestamp));
-            data.AddRange(message);
-            return data.ToArray();
-        }
-
         public static byte[] GenerateRequest(bool isRequest, byte[] message)
         {
             List<byte> data = new List<byte>();
-            data.AddRange(Header.Create(CODE, isRequest, (ushort)(message.Length + 8)));
+            data.AddRange(Header.Create(CODE, isRequest, (ushort)(message.Length)));
             data.AddRange(message);
             return data.ToArray();
         }
 
         public static void GenerateResponse(Connection c, Header h, byte[] d)
         {
-            MessagePool.Add(d);
+            HashKey16 key = HashKey16.Make(d);
 
-            //we still proceed with propagating the message so anyone attempting to trace the message will not see it stop here
-            //and assume this is the intended destination. Messages will self destruct after a time anyway
+            //check if this message is for us
+            IncomingMessage i;
+            if (KeyRing.DecryptMessage(d, out i) && MessagePool.IncomingMessages.TryAdd(key, i))
+                Log.WriteConsole($"Received a message with key {key}");
 
-            //replace the header with a new one and forward it
+            //Add to the encrypted message pool
+            if (MessagePool.EncryptedMessages.ContainsKey(key))
+                return; //already have it. skip. cause we already would have shared this the first time we got it
+
+            //Try adding it. If this doesn't work, we still forward the message anyway and we'll try again if the message comes back or a timed sync
+            MessagePool.EncryptedMessages.TryAdd(key, new EncryptedMessage(d));
+
             byte[] req = ShareMessage.GenerateRequest(true, d);
 
             ConnectionManager.ForEach(Direction.Incoming | Direction.Outgoing, (con) =>
             {
                 if (con.PeerId == h.PeerID)
-                    return; //don't return to sender
+                    return;
 
                 con.Write(req);
             });

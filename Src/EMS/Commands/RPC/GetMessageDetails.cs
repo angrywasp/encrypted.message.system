@@ -10,19 +10,24 @@ namespace EMS.Commands.RPC
             EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
             ret.Response = new JsonResponse();
 
-            foreach (var m in MessagePool.Messages)
-                ret.Response.Encrypted.Add(new EncryptedMessageItem
+            foreach (var m in MessagePool.EncryptedMessages)
+                ret.Response.Encrypted.Add(new EncryptedMessage
                 {
-                    Hash = m.Key,
-                    Timestamp = m.Value.TimeStamp
+                    Hash = m.Key.ToString()
                 });
             
-            foreach (var m in MessagePool.DecryptedMessages)
-                ret.Response.Decrypted.Add(new DecryptedMessageItem
+            foreach (var m in MessagePool.IncomingMessages)
+                ret.Response.Incoming.Add(new IncomingMessage
                 {
-                    Hash = m.Key,
-                    Timestamp = m.Value.TimeStamp,
+                    Hash = m.Key.ToString(),
                     Sender = m.Value.Sender
+                });
+
+            foreach (var m in MessagePool.OutgoingMessages)
+                ret.Response.Outgoing.Add(new OutgoingMessage
+                {
+                    Hash = m.Key.ToString(),
+                    Recipient = m.Value.Recipient
                 });
 
             jsonResult = ret;
@@ -30,28 +35,34 @@ namespace EMS.Commands.RPC
             return true;
         }
 
-        public class EncryptedMessageItem
+        public class EncryptedMessage
         {
             [JsonProperty("hash")]
-            public HashKey Hash { get; set; }
-
-            [JsonProperty("timestamp")]
-            public ulong Timestamp { get; set; }
+            public string Hash { get; set; }
         }
 
-        public class DecryptedMessageItem : EncryptedMessageItem
+        public class IncomingMessage : EncryptedMessage
         {
             [JsonProperty("sender")]
             public string Sender { get; set; }
         }
 
+        public class OutgoingMessage : EncryptedMessage
+        {
+            [JsonProperty("recipient")]
+            public string Recipient { get; set; }
+        }
+
         public class JsonResponse
         {
             [JsonProperty("encrypted")]
-            public List<EncryptedMessageItem> Encrypted { get; set; } = new List<EncryptedMessageItem>();
+            public List<EncryptedMessage> Encrypted { get; set; } = new List<EncryptedMessage>();
 
-            [JsonProperty("decrypted")]
-            public List<DecryptedMessageItem> Decrypted { get; set; } = new List<DecryptedMessageItem>();
+            [JsonProperty("incoming")]
+            public List<IncomingMessage> Incoming { get; set; } = new List<IncomingMessage>();
+
+            [JsonProperty("outgoing")]
+            public List<OutgoingMessage> Outgoing { get; set; } = new List<OutgoingMessage>();
         }
     }
 }

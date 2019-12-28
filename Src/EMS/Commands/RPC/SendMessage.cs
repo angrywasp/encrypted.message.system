@@ -1,4 +1,6 @@
 using Newtonsoft.Json;
+using System;
+using System.Text;
 
 namespace EMS.Commands.RPC
 {
@@ -7,23 +9,18 @@ namespace EMS.Commands.RPC
         public static bool Handle(object json, out object jsonResult)
         {
             EMS.JsonRequest<JsonRequest> r = (EMS.JsonRequest<JsonRequest>)json;
-            HashKey hk = MessagePool.Send(r.Request.Address, r.Request.Message);
+            EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
+            ret.Response = new JsonResponse();
 
-            if (hk == HashKey.Empty)
-            {
-                jsonResult = new EMS.JsonResponse<string>
-                {
-                    Response = "Message with calculated key already exists"
-                };
-                return false;
-            }
-            else
-            {
-                EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
-                ret.Response.Hash = hk.ToString();
-                jsonResult = ret;
-                return true;
-            }
+            string messageText = Encoding.UTF8.GetString(Convert.FromBase64String(r.Request.Message));
+
+            HashKey16 key;
+            bool sent = MessagePool.Send(r.Request.Address, messageText, out key);
+            if (sent)
+                ret.Response.Key = key.ToString();
+
+            jsonResult = ret;
+            return sent;
         }
 
         public class JsonRequest
@@ -37,8 +34,8 @@ namespace EMS.Commands.RPC
 
         public class JsonResponse
         {
-            [JsonProperty("hash")]
-            public string Hash { get; set; }
+            [JsonProperty("key")]
+            public string Key { get; set; }
         }
     }
 }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using AngryWasp.Helpers;
-using AngryWasp.Logger;
 
 namespace EMS
 {
@@ -22,29 +21,36 @@ namespace EMS
 
         public static void Start()
         {
-            Log.Instance.RemoveWriter("console");
+            
             bool noPrompt = false;
             List<char> enteredText = new List<char>();
-            Queue<Tuple<ConsoleColor, string>> buffer = new Queue<Tuple<ConsoleColor, string>>();
 
             Thread t0 = new Thread(new ThreadStart( () =>
             {
-                BufferedLogWriter blr = new BufferedLogWriter(buffer);
-                Log.Instance.AddWriter("buffered", blr, true);
-
                 while(true)
                 {
-                    Tuple<ConsoleColor, string> i = null;
-                    if (!blr.Buffer.TryDequeue(out i))
+                    if (Log.Buffer.Count == 0)
                     {
                         Thread.Sleep(50);
                         continue;
                     }
-                    Console.CursorLeft = 0;
-                    Console.ForegroundColor = i.Item1;
-                    Console.Write(new string(' ', Console.WindowWidth));
-                    Console.CursorLeft = 0;
-                    Console.WriteLine(i.Item2);
+
+                    var logMessages = Log.Buffer.ToArray();
+                    Log.Buffer.Clear();
+
+                    if (Console.CursorLeft != 0)
+                    {
+                        Console.Write("\r");
+                        Console.Write(new string(' ', Console.BufferWidth));
+                        Console.Write("\r");
+                    }
+                    
+                    foreach (var m in logMessages)
+                    {
+                        Console.ForegroundColor = m.Item1;
+                        Console.WriteLine(m.Item2);
+                    }
+
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.Write("> ");
                     Console.Write(new string(enteredText.ToArray()));
@@ -146,8 +152,10 @@ namespace EMS
                             if (commands.ContainsKey(args[0]))
                             {
                                 if (!commands[args[0]].Item2.Invoke(args))
-                                    Console.WriteLine("Command failed");
+                                    Log.WriteError("Command failed");
                             }
+                            else
+                                Log.WriteError("Unknown command");
                         }
                         
                         if (!string.IsNullOrEmpty(s))
@@ -163,6 +171,7 @@ namespace EMS
                     }
                 }
             }));
+
 
             t0.Start();
             t1.Start();

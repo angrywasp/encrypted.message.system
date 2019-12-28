@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using AngryWasp.Helpers;
 
 namespace EMS.Commands.RPC
 {
@@ -10,8 +9,9 @@ namespace EMS.Commands.RPC
             EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
             ret.Response = new JsonResponse
             {
-                Total = MessagePool.Count,
-                Decrypted = MessagePool.DecryptedCount
+                Encrypted = MessagePool.EncryptedMessages.Count,
+                Incoming = MessagePool.IncomingMessages.Count,
+                Outgoing = MessagePool.OutgoingMessages.Count
             };
 
             jsonResult = ret;
@@ -21,11 +21,14 @@ namespace EMS.Commands.RPC
 
         public class JsonResponse
         {
-            [JsonProperty("total")]
-            public int Total { get; set; }
+            [JsonProperty("encrypted")]
+            public int Encrypted { get; set; }
 
-            [JsonProperty("decrypted")]
-            public int Decrypted { get; set; }
+            [JsonProperty("incoming")]
+            public int Incoming { get; set; }
+
+            [JsonProperty("outgoing")]
+            public int Outgoing { get; set; }
         }
     }
 }
