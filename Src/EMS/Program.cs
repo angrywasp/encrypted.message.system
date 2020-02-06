@@ -4,6 +4,8 @@ using AngryWasp.Net;
 using EMS.Commands.P2P;
 using EMS.Commands.RPC;
 using EMS.Commands.CLI;
+using DnsClient;
+using System.Linq;
 
 namespace EMS
 {
@@ -76,6 +78,12 @@ namespace EMS
 
 #region Timed events
 
+            //Check for new seeds via DNS every hour
+            TimedEventManager.Add("seeds", () =>
+            {
+                AddSeedFromDns();
+            }, 3600 * 1000);
+
             // Poll the seed nodes for more peers if disconnected
             TimedEventManager.Add("reconnect", () =>
             {
@@ -132,6 +140,30 @@ namespace EMS
             });
 
             Application.Start();
+        }
+
+        private static void AddSeedFromDns()
+        {
+            var client = new LookupClient();
+            var records = client.Query("seed.angrywasp.net.au", QueryType.TXT).Answers;
+                
+            foreach (var r in records)
+            {
+                string txt = ((DnsClient.Protocol.TxtRecord)r).Text.ToArray()[0];
+
+                string[] node = txt.Split(':', StringSplitOptions.RemoveEmptyEntries);
+                string host = node[0];
+                ushort port = AngryWasp.Net.Config.DEFAULT_PORT;
+                if (node.Length > 1)
+                    ushort.TryParse(node[1], out port);
+
+                foreach (var s in AngryWasp.Net.Config.SeedNodes)
+                    if (s.Host == host && s.Port == port)
+                        continue;
+
+                AngryWasp.Net.Config.AddSeedNode(host, port);
+                Log.WriteConsole($"Added seed node {host}:{port}");
+            }
         }
     }
 }
