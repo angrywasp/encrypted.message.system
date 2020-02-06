@@ -21,7 +21,7 @@ namespace EMS
             return true;
         }
 
-        public void SetReadProof(HashKey16 key, HashKey32 hash)
+        public virtual void SetReadProof(HashKey16 key, HashKey32 hash)
         {
             readProofKey = key;
 
@@ -56,6 +56,13 @@ namespace EMS
         public HashKey32 ExtractReadProofHash()
         {
             return message.Skip(69).Take(32).ToArray();
+        }
+
+        public override void SetReadProof(HashKey16 key, HashKey32 hash)
+        {
+            base.SetReadProof(key, hash);
+            //prune the message pool by truncating the message
+            message = null;
         }
     }
 
@@ -132,10 +139,9 @@ namespace EMS
 
             ulong timestamp = DateTimeHelper.TimestampNow();
 
-            //Unencrypted message format
             //timestamp
             //read proof nonce
-            //the actual message
+            //message
             List<byte> msgBytes = BitShifter.ToByte(timestamp).ToList();
             msgBytes.AddRange(AngryWasp.Cryptography.Helper.GenerateSecureBytes(16));
             msgBytes.AddRange(Encoding.ASCII.GetBytes(message));
