@@ -54,7 +54,7 @@ In order to facilitate this, the sender includes a field in the message body cal
     - Message key
     - Plain text nonce
 
-This message is quite simple and consists of only the key to look up the matching message in the pool and the plain text nonce which is encrypted in the original message. Who actually sends the message is not of great importance. The nonce is resource intensive to brute force, which serves as a deterrent to try and attack the network by deleting messages from the pool by marking them as read. During verification, this nonce is hashed by the verifying node and compared to the ack proof hash included in the matching message. If it matches, we accept it. If a node attempts to send a proof that is invalid, it will be disconnected from the network.
+This message is quite simple and consists of only the key to look up the matching message in the pool and the plain text nonce which is encrypted in the original message. Who actually sends the message is not of great importance. The nonce is resource intensive to brute force, which serves as a deterrent to try and attack the network by deleting messages from the pool by marking them as read. During verification, this nonce is hashed by the verifying node and compared to the read proof hash included in the matching message. If it matches, we accept it. If a node attempts to send a proof that is invalid, it will be disconnected from the network.
 
 
 ## Privacy Considerations
