@@ -102,9 +102,10 @@ namespace EMS
 
         public static implicit operator HashKey32(byte[] value) => new HashKey32(value);
 
-        public static implicit operator byte[](HashKey32 value) => value;
+        public static implicit operator byte[](HashKey32 value) => value.ToByte();
 
         public static implicit operator HashKey32(List<byte> value) => new HashKey32(value.ToArray());
+        
 
         public override string ToString() => value.ToHex();
 

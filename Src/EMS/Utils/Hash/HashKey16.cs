@@ -94,7 +94,7 @@ namespace EMS
 
         public static implicit operator HashKey16(byte[] value) => new HashKey16(value);
 
-        public static implicit operator byte[](HashKey16 value) => value;
+        public static implicit operator byte[](HashKey16 value) => value.ToByte();
 
         public static implicit operator HashKey16(List<byte> value) => new HashKey16(value.ToArray());
 
