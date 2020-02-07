@@ -47,6 +47,7 @@ namespace EMS
         }
 
         public static HashKey32 Make(byte[] input) => Keccak.Hash256(input);
+        public static HashKey32 Make(IEnumerable<byte> input) => Keccak.Hash256(input.ToArray());
 
         public bool Equals(HashKey32 other) => this.SequenceEqual(other);
 

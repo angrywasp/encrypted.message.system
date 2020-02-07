@@ -43,6 +43,7 @@ namespace EMS
         }
 
         public static HashKey16 Make(byte[] input) => Keccak.Hash128(input);
+        public static HashKey16 Make(IEnumerable<byte> input) => Keccak.Hash128(input.ToArray());
 
         public bool Equals(HashKey16 other) => this.SequenceEqual(other);
 
