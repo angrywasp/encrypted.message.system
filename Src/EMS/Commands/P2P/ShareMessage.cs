@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using AngryWasp.Cryptography;
 using AngryWasp.Net;
 
 namespace EMS.Commands.P2P
@@ -18,11 +17,17 @@ namespace EMS.Commands.P2P
 
         public static void GenerateResponse(Connection c, Header h, byte[] d)
         {
-            HashKey16 key = HashKey16.Make(d);
+            HashKey16 key = HashKey16.Empty;
+            IncomingMessage incomingMessage = null;
+
+            if (!MessagePool.VerifyMessage(d, true, out key, out incomingMessage))
+            {
+                c.AddFailure();
+                return;
+            }
 
             //check if this message is for us
-            IncomingMessage i;
-            if (KeyRing.DecryptMessage(d, out i) && MessagePool.IncomingMessages.TryAdd(key, i))
+            if (MessagePool.IncomingMessages.TryAdd(key, incomingMessage))
                 Log.WriteConsole($"Received a message with key {key}");
 
             //Add to the encrypted message pool

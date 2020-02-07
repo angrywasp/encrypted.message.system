@@ -108,7 +108,6 @@ namespace EMS.Commands.P2P
             }
             else
             {
-                //todo: parse response into local message pool
                 int bytesRead = 0;
 
                 while (true)
@@ -148,14 +147,18 @@ namespace EMS.Commands.P2P
                             else
                                 c.AddFailure();
                         }
-                        
+
                         //Check if this message is incoming to us. 
-                        IncomingMessage i;
-                        if (!KeyRing.DecryptMessage(msg, out i) || !MessagePool.IncomingMessages.TryAdd(key, i))
+                        HashKey16 newKey;
+                        IncomingMessage incomingMessage;
+                        if (!MessagePool.VerifyMessage(msg, false, out newKey, out incomingMessage))
+                            continue;
+                        
+                        if (!MessagePool.IncomingMessages.TryAdd(key, incomingMessage))
                             continue;
 
                         //Mark as read if the accompanying encrypted message has the proof.
-                        i.SetAsRead(e.HasReadProof());
+                        incomingMessage.SetAsRead(e.HasReadProof());
                     }
                     else //we have this in our local message pool
                     {

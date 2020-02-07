@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using AngryWasp.Cryptography;
 using AngryWasp.Helpers;
@@ -39,11 +38,12 @@ namespace EMS
 
         public static byte[] CreateSharedKey(byte[] recipientPublicKey) => Ecc.CreateKeyAgreement(privateKey, recipientPublicKey);
 
-        public static bool EncryptMessage(byte[] input, string base58RecipientAddress, out byte[] result, out byte[] key)
+        public static bool EncryptMessage(byte[] input, string base58RecipientAddress, out byte[] encryptionResult, out byte[] signature, out byte[] addressXor)
         {
             byte[] to;
-            result = null;
-            key = null;
+            encryptionResult = null;
+            signature = null;
+            addressXor = null;
             if (!Base58.Decode(base58RecipientAddress, out to))
             {
                 Log.WriteWarning("Address is invalid");
@@ -60,63 +60,50 @@ namespace EMS
 
             BitArray a = new BitArray(publicKey);
             BitArray b = new BitArray(to);
-            key = new byte[publicKey.Length];
+            addressXor = new byte[publicKey.Length];
 
             a.Xor(b);
-            a.CopyTo(key, 0);
+            a.CopyTo(addressXor, 0);
 
-            byte[] encrypted = Aes.Encrypt(input, sharedKey);
-            byte[] sig = Ecc.Sign(encrypted, privateKey);
-            List<byte> msg = new List<byte>();
+            encryptionResult = Aes.Encrypt(input, sharedKey);
+            signature = Ecc.Sign(encryptionResult, privateKey);
 
-            msg.AddRange(BitShifter.ToByte((ushort)sig.Length));
-            msg.AddRange(BitShifter.ToByte((ushort)encrypted.Length));
-
-            byte[] readProofKey = input.Skip(8).Take(16).ToArray();
-
-            msg.AddRange(key);
-            msg.AddRange(ProvableMessage.GenerateHash(readProofKey));
-
-            msg.AddRange(sig);
-            msg.AddRange(encrypted);
-
-            result = msg.ToArray();
             return true;
         }
         
-        public static bool DecryptMessage(byte[] input, out IncomingMessage result)
+        public static bool DecryptMessage(byte[] input, out string address, out HashKey16 readProofNonce, out HashKey32 readProofHash, out string message)
         {
-            result = null;
+            address = null;
+            readProofNonce = HashKey16.Empty;
+            readProofHash = HashKey32.Empty;
+            message = null;
+
             BinaryReader reader = new BinaryReader(new MemoryStream(input));
             reader.BaseStream.Seek(0, SeekOrigin.Begin);
 
-            ushort sigLen = BitShifter.ToUShort(reader.ReadBytes(2));
-            ushort encLen = BitShifter.ToUShort(reader.ReadBytes(2));
+            ushort signatureLength = BitShifter.ToUShort(reader.ReadBytes(2));
+            ushort encryptedMessageLength = BitShifter.ToUShort(reader.ReadBytes(2));
             byte[] xorKey = reader.ReadBytes(65);
-            HashKey32 proofHash = reader.ReadBytes(32);
+            readProofHash = reader.ReadBytes(32);
             byte[] a = new byte[65];
 
             BitArray ba = new BitArray(publicKey);
             BitArray bb = new BitArray(xorKey);
             ba.Xor(bb);
             ba.CopyTo(a, 0);
-            string address = Base58.Encode(a);
+    
+            byte[] signature = reader.ReadBytes(signatureLength);
+            byte[] encryptedMessage = reader.ReadBytes(encryptedMessageLength);
 
-            byte[] sig = reader.ReadBytes(sigLen);
-            byte[] enc = reader.ReadBytes(encLen);
-
-            if (!Ecc.Verify(enc, a, sig))
+            if (!Ecc.Verify(encryptedMessage, a, signature))
                 return false;
 
-            byte[] sharedKey = CreateSharedKey(a);
-            byte[] decrypted = Aes.Decrypt(enc, sharedKey);
+            byte[] decrypted = Aes.Decrypt(encryptedMessage, CreateSharedKey(a));
 
-            ulong ts = BitShifter.ToULong(decrypted);
-            HashKey16 proofNonce = decrypted.Skip(8).Take(16).ToArray();
-            string msg = Encoding.ASCII.GetString(decrypted.Skip(24).ToArray());
+            address = Base58.Encode(a);
+            readProofNonce = decrypted.Take(16).ToArray();
+            message = Encoding.ASCII.GetString(decrypted.Skip(16).ToArray());
 
-            result = new IncomingMessage(ts, address, msg);
-            result.SetReadProof(proofNonce, proofHash);
             return true;
         }
     }

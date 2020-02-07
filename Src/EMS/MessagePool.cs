@@ -5,10 +5,9 @@ using AngryWasp.Net;
 using EMS.Commands.P2P;
 using System.Linq;
 using System.Collections.Concurrent;
-using Org.BouncyCastle.Crypto.Generators;
-using Org.BouncyCastle.Crypto.Parameters;
 using System.Diagnostics;
 using System;
+using System.IO;
 
 namespace EMS
 {
@@ -59,7 +58,7 @@ namespace EMS
 
         public HashKey32 ExtractReadProofHash()
         {
-            return message.Skip(69).Take(32).ToArray();
+            return message.Skip(113).Take(32).ToArray();
         }
 
         public override void SetReadProof(HashKey16 key, HashKey32 hash)
@@ -72,19 +71,22 @@ namespace EMS
 
     public class IncomingMessage : ProvableMessage
     {
-        private ulong timestamp;
+        private uint timestamp;
+        private uint expiration;
         private string sender;
         private string message;
         private bool isRead;
 
-        public ulong TimeStamp => timestamp;
+        public uint TimeStamp => timestamp;
+        public uint Expiration => expiration;
         public string Sender => sender;
         public string Message => message;
         public bool IsRead => isRead;
 
-        public IncomingMessage(ulong timestamp, string sender, string message)
+        public IncomingMessage(uint timestamp, uint expiration, string sender, string message)
         {
             this.timestamp = timestamp;
+            this.expiration = expiration;
             this.sender = sender;
             this.message = message;
         }
@@ -97,17 +99,17 @@ namespace EMS
 
     public class OutgoingMessage
     {
-        private ulong timestamp;
+        private uint timestamp;
         private string recipient;
         private string message;
 
-        public ulong TimeStamp => timestamp;
+        public uint TimeStamp => timestamp;
 
         public string Recipient => recipient;
 
         public string Message => message;
 
-        public OutgoingMessage(ulong ts, string r, string m)
+        public OutgoingMessage(uint ts, string r, string m)
         {
             timestamp = ts;
             recipient = r;
@@ -137,29 +139,39 @@ namespace EMS
 
             if (message.Length > (16 * 1024))
             {
-                Log.WriteWarning("Message exceeds the 16kb limit");
+                Log.WriteError("Message exceeds the 16kb limit");
                 return false;
             }
 
-            ulong timestamp = DateTimeHelper.TimestampNow();
+            if (expiration < GlobalConfig.MIN_MESSAGE_EXPIRATION)
+            {
+                Log.WriteError($"Message expiration is less than the minimum {GlobalConfig.MIN_MESSAGE_EXPIRATION}");
+                return false;
+            }
 
-            List<byte> msgBytes = BitShifter.ToByte(timestamp).ToList();
-            msgBytes.AddRange(AngryWasp.Cryptography.Helper.GenerateSecureBytes(16));
-            msgBytes.AddRange(Encoding.ASCII.GetBytes(message));
+            byte[] encryptionResult, signature, addressXor;
 
-            byte[] encResult;
-            byte[] addressXor;
-            if (!KeyRing.EncryptMessage(msgBytes.ToArray(), address, out encResult, out addressXor))
+            byte[] readProofKey = AngryWasp.Cryptography.Helper.GenerateSecureBytes(16);
+            byte[] readProofHash = ProvableMessage.GenerateHash(readProofKey);
+
+            byte[] msg = readProofKey
+                .Concat(Encoding.ASCII.GetBytes(message)).ToArray();
+
+            if (!KeyRing.EncryptMessage(msg, address, out encryptionResult, out signature, out addressXor))
                 return false;
 
-            //prepend a uint width of bytes to the array for a hashing nonce and the expiration time
-            byte[] finalMessage = new byte[4] {0, 0, 0, 0};
-            finalMessage = finalMessage.Concat(BitShifter.ToByte((uint)DateTimeHelper.TimestampNow() + expiration)).ToArray();
-            finalMessage = finalMessage.Concat(encResult).ToArray();
+            byte[] finalMessage = new byte[4] {0, 0, 0, 0}
+                .Concat(BitShifter.ToByte(expiration))
+                .Concat(BitShifter.ToByte((ushort)signature.Length))
+                .Concat(BitShifter.ToByte((ushort)encryptionResult.Length))
+                .Concat(addressXor)
+                .Concat(readProofHash)
+                .Concat(signature)
+                .Concat(encryptionResult).ToArray();
 
             uint x = MathHelper.Random.GenerateRandomSeed();
-            ulong difficulty = expiration * 1024;
-            byte[] messageHash = null;
+            ulong difficulty = expiration * GlobalConfig.DIFF_MULTIPLIER;
+            HashKey32 messageHash = HashKey32.Empty;
             Stopwatch sw = new Stopwatch();
             sw.Start();
             while(true)
@@ -174,9 +186,14 @@ namespace EMS
 
             sw.Stop();
 
-            Log.WriteConsole($"Message took {sw.ElapsedMilliseconds / 1000.0} seconds to hash");
+            Log.WriteConsole($"Heshed in {sw.ElapsedMilliseconds / 1000.0} seconds, {messageHash}");
 
-            finalMessage = messageHash.Concat(finalMessage).ToArray();
+            uint timestamp = (uint)DateTimeHelper.TimestampNow();
+
+            //we append the creation timestamp after the PoW portion so we aren't burning the FTL window hashing the message
+            finalMessage = messageHash
+                .Concat(BitShifter.ToByte(timestamp))
+                .Concat(finalMessage).ToArray();
 
             key = HashKey16.Make(finalMessage);
 
@@ -241,6 +258,68 @@ namespace EMS
             {
                 c.Write(req);
             });
+
+            return true;
+        }
+    
+        public static bool VerifyMessage(byte[] input, bool verifyFtl, out HashKey16 key, out IncomingMessage incomingMessage)
+        {
+            key = HashKey16.Make(input);
+            incomingMessage = null;
+
+            BinaryReader reader = new BinaryReader(new MemoryStream(input));
+            reader.BaseStream.Seek(0, SeekOrigin.Begin);
+
+            //take the message hash and timestamp as these are not part of the message that is hashed
+            HashKey32 hash = input.Take(32).ToArray();
+            uint timestamp = BitShifter.ToUInt(input.Skip(32).Take(4).ToArray());
+
+            //Hash the rest of the message
+            HashKey32 compare = SlowHash.Hash(input.Skip(36).ToArray());
+
+            //compare the provided hash with the result of our own hashing
+            if (hash != compare)
+            {
+                Log.WriteError($"Message failed validation. Incorrect hash, {hash} != {compare}");
+                return false;
+            }
+
+            //extract nonce and expiration time
+            uint nonce = BitShifter.ToUInt(input.Skip(36).Take(4).ToArray());
+            uint expiration = BitShifter.ToUInt(input.Skip(40).Take(4).ToArray());
+
+            //the hash matches, but is it valid for the provided expiration time?
+            ulong difficulty = expiration * GlobalConfig.DIFF_MULTIPLIER;
+            if (!Validator.CheckHash(compare, difficulty))
+            {
+                Log.WriteError($"Message failed validation. Invalid expiration time, {compare}");
+                return false;
+            }
+
+            //FTL check, but only if we are verifying a message received through the ShareMessage p2p command
+            //If we are receiving this via RequestMessagePool, we must skip this verification as we are pulling old
+            //Messages and this check will in most cases fail
+            if (verifyFtl && ((uint)Math.Abs(timestamp - (uint)DateTimeHelper.TimestampNow()) > GlobalConfig.FTL))
+            {
+                Log.WriteError($"Message failed validation. Outside future time limit");
+                return false;
+            }
+            
+            //Make sure expiration is the minimum
+            if (expiration < GlobalConfig.MIN_MESSAGE_EXPIRATION)
+            {
+                Log.WriteError($"Message failed validation. Short life span");
+                return false;
+            }
+
+            string address;
+            HashKey16 readProofNonce;
+            HashKey32 readProofHash;
+            string message;
+            KeyRing.DecryptMessage(input.Skip(44).ToArray(), out address, out readProofNonce, out readProofHash, out message);
+
+            incomingMessage = new IncomingMessage(timestamp, expiration, address, message);
+            incomingMessage.SetReadProof(readProofNonce, readProofHash);
 
             return true;
         }

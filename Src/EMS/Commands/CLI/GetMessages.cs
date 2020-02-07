@@ -47,7 +47,9 @@ namespace EMS.Commands.CLI
                     Console.WriteLine($"  Read: {m.Key}");
                 else
                     Console.WriteLine($"Unread: {m.Key}");
+                    
                 Console.WriteLine($"  Time: {DateTimeHelper.UnixTimestampToDateTime(m.Value.TimeStamp)}");
+                Console.WriteLine($"Expiry: {DateTimeHelper.UnixTimestampToDateTime(m.Value.TimeStamp + m.Value.Expiration)}");
                 Console.WriteLine($"  From: {m.Value.Sender}");
                 ++count;
             }
