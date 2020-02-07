@@ -71,7 +71,14 @@ namespace EMS
             listener.Prefixes.Add($"https://*:{sslPort}/");
             //todo: do we need authentication?
             listener.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
-            listener.Start();
+            try
+            {
+                listener.Start();
+            } catch (Exception ex)
+            {
+                Log.WriteError(ex.Message);
+            }
+            
             Log.WriteInfo($"Local RPC endpoint on port {port} ({sslPort} SSL)");
             Log.WriteConsole($"Local RPC endpoint on port {port} ({sslPort} SSL)");
             Log.WriteInfo("RPC server initialized");
