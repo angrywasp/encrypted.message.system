@@ -39,10 +39,11 @@ namespace EMS
 
         public static byte[] CreateSharedKey(byte[] recipientPublicKey) => Ecc.CreateKeyAgreement(privateKey, recipientPublicKey);
 
-        public static bool EncryptMessage(byte[] input, string base58RecipientAddress, out byte[] result)
+        public static bool EncryptMessage(byte[] input, string base58RecipientAddress, out List<byte> result, out byte[] key)
         {
             byte[] to;
             result = null;
+            key = null;
             if (!Base58.Decode(base58RecipientAddress, out to))
             {
                 Log.WriteWarning("Address is invalid");
@@ -59,7 +60,7 @@ namespace EMS
 
             BitArray a = new BitArray(publicKey);
             BitArray b = new BitArray(to);
-            byte[] key = new byte[publicKey.Length];
+            key = new byte[publicKey.Length];
 
             a.Xor(b);
             a.CopyTo(key, 0);
@@ -79,7 +80,7 @@ namespace EMS
             msg.AddRange(sig);
             msg.AddRange(encrypted);
 
-            result = msg.ToArray();
+            result = msg;
             return true;
         }
         
