@@ -15,7 +15,7 @@ namespace EMS.Commands.RPC
             string messageText = Encoding.UTF8.GetString(Convert.FromBase64String(r.Request.Message));
 
             HashKey16 key;
-            bool sent = MessagePool.Send(r.Request.Address, messageText, out key);
+            bool sent = MessagePool.Send(r.Request.Address, messageText, r.Request.Expiration, out key);
             if (sent)
                 ret.Response.Key = key.ToString();
 
@@ -30,6 +30,9 @@ namespace EMS.Commands.RPC
 
             [JsonProperty("message")]
             public string Message { get; set; }
+
+            [JsonProperty("expiration")]
+            public uint Expiration { get; set; } = 3600;
         }
 
         public class JsonResponse

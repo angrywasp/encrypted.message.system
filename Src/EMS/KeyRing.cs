@@ -39,7 +39,7 @@ namespace EMS
 
         public static byte[] CreateSharedKey(byte[] recipientPublicKey) => Ecc.CreateKeyAgreement(privateKey, recipientPublicKey);
 
-        public static bool EncryptMessage(byte[] input, string base58RecipientAddress, out List<byte> result, out byte[] key)
+        public static bool EncryptMessage(byte[] input, string base58RecipientAddress, out byte[] result, out byte[] key)
         {
             byte[] to;
             result = null;
@@ -80,7 +80,7 @@ namespace EMS
             msg.AddRange(sig);
             msg.AddRange(encrypted);
 
-            result = msg;
+            result = msg.ToArray();
             return true;
         }
         

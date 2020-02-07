@@ -5,6 +5,10 @@ using AngryWasp.Net;
 using EMS.Commands.P2P;
 using System.Linq;
 using System.Collections.Concurrent;
+using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Parameters;
+using System.Diagnostics;
+using System;
 
 namespace EMS
 {
@@ -127,7 +131,7 @@ namespace EMS
 
         public static int OutgoingCount => outgoingMessages.Count;
 
-        public static bool Send(string address, string message, out HashKey16 key)
+        public static bool Send(string address, string message, uint expiration, out HashKey16 key)
         {
             key = HashKey16.Empty;
 
@@ -139,34 +143,50 @@ namespace EMS
 
             ulong timestamp = DateTimeHelper.TimestampNow();
 
-            //timestamp
-            //read proof nonce
-            //message
             List<byte> msgBytes = BitShifter.ToByte(timestamp).ToList();
             msgBytes.AddRange(AngryWasp.Cryptography.Helper.GenerateSecureBytes(16));
             msgBytes.AddRange(Encoding.ASCII.GetBytes(message));
 
-            //Encrypted message format
-            //Signature length
-            //encrypted data length
-            //xor address key
-            //read proof hash
-            //message signature
-            //encrypted message data (msgBytes - AES encrypted)
-            byte[] encrypted;
-            
-            if (!KeyRing.EncryptMessage(msgBytes.ToArray(), address, out encrypted))
+            byte[] encResult;
+            byte[] addressXor;
+            if (!KeyRing.EncryptMessage(msgBytes.ToArray(), address, out encResult, out addressXor))
                 return false;
 
-            key = HashKey16.Make(encrypted);
+            //prepend a uint width of bytes to the array for a hashing nonce and the expiration time
+            byte[] finalMessage = new byte[4] {0, 0, 0, 0};
+            finalMessage = finalMessage.Concat(BitShifter.ToByte((uint)DateTimeHelper.TimestampNow() + expiration)).ToArray();
+            finalMessage = finalMessage.Concat(encResult).ToArray();
+
+            uint x = MathHelper.Random.GenerateRandomSeed();
+            ulong difficulty = expiration * 1024;
+            byte[] messageHash = null;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            while(true)
+            {
+                Buffer.BlockCopy(BitShifter.ToByte(x), 0, finalMessage, 0, 4);
+                messageHash = SlowHash.Hash(finalMessage).ToByte();
+                if (Validator.CheckHash(messageHash, difficulty))
+                    break;
+
+                ++x;
+            }
+
+            sw.Stop();
+
+            Log.WriteConsole($"Message took {sw.ElapsedMilliseconds / 1000.0} seconds to hash");
+
+            finalMessage = messageHash.Concat(finalMessage).ToArray();
+
+            key = HashKey16.Make(finalMessage);
 
             //add it to a special list of outgoing messages to make sorting messages for display easier
             outgoingMessages.TryAdd(key, new OutgoingMessage(timestamp, address, message));
 
-            if (!encryptedMessages.TryAdd(key, new EncryptedMessage(encrypted)))
+            if (!encryptedMessages.TryAdd(key, new EncryptedMessage(finalMessage)))
                 return false;
 
-            byte[] req = ShareMessage.GenerateRequest(true, encrypted);
+            byte[] req = ShareMessage.GenerateRequest(true, finalMessage);
 
             ConnectionManager.ForEach(Direction.Incoming | Direction.Outgoing, (c) =>
             {
