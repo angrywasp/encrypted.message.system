@@ -17,7 +17,7 @@ namespace EMS.Commands.RPC
             HashKey16 key;
             bool sent = MessagePool.Send(r.Request.Address, messageText, r.Request.Expiration, out key);
             if (sent)
-                ret.Response.Key = key.ToString();
+                ret.Response.Key = key;
 
             jsonResult = ret;
             return sent;
@@ -38,7 +38,7 @@ namespace EMS.Commands.RPC
         public class JsonResponse
         {
             [JsonProperty("key")]
-            public string Key { get; set; }
+            public HashKey16 Key { get; set; } = HashKey16.Empty;
         }
     }
 }

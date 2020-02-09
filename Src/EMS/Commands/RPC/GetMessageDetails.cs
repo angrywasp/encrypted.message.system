@@ -10,59 +10,52 @@ namespace EMS.Commands.RPC
             EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
             ret.Response = new JsonResponse();
 
-            foreach (var m in MessagePool.EncryptedMessages)
-                ret.Response.Encrypted.Add(new EncryptedMessage
+            foreach (var m in MessagePool.Messages)
+            {
+                bool isRead = m.Value.ReadProof != null && m.Value.ReadProof.IsRead;
+                string direction = m.Value.IsDecrypted ? (MessagePool.OutgoingMessages.Contains(m.Key) ? "out": "in") : string.Empty;
+
+                ret.Response.Details.Add(new MessageDetail
                 {
-                    Hash = m.Key.ToString()
+                    Key = m.Key,
+                    Timestamp = m.Value.Timestamp,
+                    Expiration = m.Value.Expiration,
+                    Address = m.Value.Address,
+                    Read = isRead,
+                    Direction = direction
                 });
+            }
             
-            foreach (var m in MessagePool.IncomingMessages)
-                ret.Response.Incoming.Add(new IncomingMessage
-                {
-                    Hash = m.Key.ToString(),
-                    Sender = m.Value.Sender
-                });
-
-            foreach (var m in MessagePool.OutgoingMessages)
-                ret.Response.Outgoing.Add(new OutgoingMessage
-                {
-                    Hash = m.Key.ToString(),
-                    Recipient = m.Value.Recipient
-                });
-
             jsonResult = ret;
             
             return true;
         }
 
-        public class EncryptedMessage
+        public class MessageDetail
         {
-            [JsonProperty("hash")]
-            public string Hash { get; set; }
-        }
+            [JsonProperty("key")]
+            public HashKey16 Key { get; set; } = HashKey16.Empty;
 
-        public class IncomingMessage : EncryptedMessage
-        {
-            [JsonProperty("sender")]
-            public string Sender { get; set; }
-        }
+            [JsonProperty("timestamp")]
+            public uint Timestamp { get; set; } = 0;
 
-        public class OutgoingMessage : EncryptedMessage
-        {
-            [JsonProperty("recipient")]
-            public string Recipient { get; set; }
+            [JsonProperty("expiration")]
+            public uint Expiration { get; set; } = 0;
+
+            [JsonProperty("address")]
+            public string Address { get; set; } = string.Empty;
+
+            [JsonProperty("read")]
+            public bool Read { get; set; } = false;
+            
+            [JsonProperty("direction")]
+            public string Direction { get; set; } = string.Empty;
         }
 
         public class JsonResponse
         {
-            [JsonProperty("encrypted")]
-            public List<EncryptedMessage> Encrypted { get; set; } = new List<EncryptedMessage>();
-
-            [JsonProperty("incoming")]
-            public List<IncomingMessage> Incoming { get; set; } = new List<IncomingMessage>();
-
-            [JsonProperty("outgoing")]
-            public List<OutgoingMessage> Outgoing { get; set; } = new List<OutgoingMessage>();
+            [JsonProperty("details")]
+            public List<MessageDetail> Details { get; set; } = new List<MessageDetail>();
         }
     }
 }

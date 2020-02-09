@@ -18,9 +18,8 @@ The status field is either `OK` or `ERROR` depending on success or failure of th
 ## RPC functions
 
 Below is a list of the available RPC functions and an example of making the RPC request in bash and expected response. Examples bash scripts are also contained in `./rpc-test`.  
-Examples assume that the node is started with `--rpc-port 5000`
 
-## **get_address**
+### **get_address**
 
 Returns the address currently in use by the node. [Bash example](./rpc-test/get_address)
 
@@ -48,9 +47,11 @@ Returns the address currently in use by the node. [Bash example](./rpc-test/get_
 - `private`: Base58 encoded private key. This is required to restore your address.  
 - `private_hex`: Hex representation of the private key.  
 
-*Note: if `private` is set to false in the request, both `private` and `private_hex` response fields will be `null`*
+**Notes** 
 
-## **get_message_count**
+If `private` is set to false in the request, both `private` and `private_hex` response fields will be 0 length strings
+
+### **get_message_count**
 
 Returns a count of the messages in the pool. [Bash example](./rpc-test/get_message_count)
 
@@ -58,9 +59,8 @@ Returns a count of the messages in the pool. [Bash example](./rpc-test/get_messa
 ``` json
 { 
     "response":{ 
-        "encrypted":1,
-        "incoming":1,
-        "outgoing":0
+        "total":1,
+        "decrypted":1
     },
     "status":"OK"
 }
@@ -72,40 +72,45 @@ Returns a count of the messages in the pool. [Bash example](./rpc-test/get_messa
 
 **Output:**    
 
-- `encrypted`: The number of messages in the encrypted message pool.  
-- `incoming`: The number of incoming messages. i.e. The number of messages you have received.  
-- `outgoing`: The number of outgoing messages. i.e. The number of messages you have sent.
+- `total`: The number of messages in the message pool.  
+- `decrypted`: The number of decrypteds messages. i.e. The number of messages you have sent or received.  
 
-## **get_message_details**
+### **get_message_details**
 
 Gets basic details of messages in the pool
 
 **Response**  
 ``` json
-{ 
-    "response":{ 
-        "encrypted":[ 
-            { 
-                "hash":"3bfd760da41fb55b6cf8fb7c23f90191"
-            },
-            { 
-                "hash":"cd5c09f8bc8c6141275fc7bb37d078c3"
-            }
-        ],
-        "incoming":[ 
-            { 
-                "sender":"NLje9jsC5ukYTDqo18hdwXiShjMMshcR8nAxUGYEAVGwbde9Fy2sTgkZwJVfxwgK1JqKes5oQVzNQDqNijQzrHzd",
-                "hash":"3bfd760da41fb55b6cf8fb7c23f90191"
-            }
-        ],
-        "outgoing":[ 
-            { 
-                "recipient":"NLje9jsC5ukYTDqo18hdwXiShjMMshcR8nAxUGYEAVGwbde9Fy2sTgkZwJVfxwgK1JqKes5oQVzNQDqNijQzrHzd",
-                "hash":"cd5c09f8bc8c6141275fc7bb37d078c3"
-            }
-        ]
-    },
-    "status":"OK"
+{
+  "response": {
+    "details": [
+      {
+        "key": "c2679f2f708bb8fa44d3cb9a7463b8ae",
+        "timestamp": 1581252892,
+        "expiration": 3600,
+        "address": "PyLmzy5yzP1QNFvFanDpVRgdXcQv7tK6zoVJPrdFUTvErbTbjGAEbirMPhUHZNTxEj4FLaLojycccMfMiixEaeYR",
+        "read": true,
+        "direction": "in"
+      },
+      {
+        "key": "a6c2372887b9ea6eb322e1d4d8cd252c",
+        "timestamp": 1581252855,
+        "expiration": 3600,
+        "address": "RVuxUERcDAKqiSQGX2DMR7LKLDSpZGVwZrX5zeKuvupwkwkMPbQf63igVQLTfhqeZur3rGWpN2JfuANizyForYXN",
+        "read": false,
+        "direction": "out"
+      },
+      {
+        "key": "bbafb333a94e8faca9a714750c453c5a",
+        "timestamp": 1581252883,
+        "expiration": 3600,
+        "address": "",
+        "read": false,
+        "direction": ""
+      }
+    ]
+  },
+  "status": "OK"
 }
 ```
 
@@ -115,29 +120,41 @@ Gets basic details of messages in the pool
 
 **Output:**  
 
-- `encrypted`: An array of encrypted messages in the pool.   
-    - `hash`: The hash of the message.  
-- `incoming`: An array of incoming message items.    
-    - `hash`: The hash of the message.  
-    - `sender`: The address that sent the message to you.  
-- `outgoing`: An array of outgoing message items.  
-    - `hash`: The hash of the message.
-    - `recipient`: The address you sent the message to.  
+- `details`: An array of messages in the pool.   
+    - `key`: The key of the message.  
+    - `timestamp`: The creation timestamp of the message.  
+    - `expiration`: The lifetime of the message in seconds.  
+    - `address`: The address of the message. Empty if the message is encrypted.  
+    - `read`: Has this message previously been read?
+    - `direction`: The status of the message, whether incoming or outgoing. Empty if the message is encrypted.
 
-## **get_message**
+**Notes**
+
+The address field indicates different things depending on the status of direction  
+If `direction = "in"`, the address is the address of the party sending the message  
+If `direction = "out"`, the address is is the address of the party receiving the message
+
+### **get_message**
 
 Retrieves a message to read. [Bash example](./rpc-test/get_message)
 
 **Response**  
 ``` json
-{ 
-    "response":{ 
-        "incoming":true,
-        "timestamp":1577523451,
-        "destination":"NLje9jsC5ukYTDqo18hdwXiShjMMshcR8nAxUGYEAVGwbde9Fy2sTgkZwJVfxwgK1JqKes5oQVzNQDqNijQzrHzd",
-        "message":"SGVsbG8gV29ybGQ="
-    },
-    "status":"OK"
+{
+  "response": {
+    "key": "4916fcc2c58305e7850e7bc0bc636fe5",
+    "hash": "0811222165df66f8781606bf6aba6a718c1d6d4c748956ce9546f47a8b020000",
+    "timestamp": 1581253880,
+    "expiration": 3600,
+    "address": "RVuxUERcDAKqiSQGX2DMR7LKLDSpZGVwZrX5zeKuvupwkwkMPbQf63igVQLTfhqeZur3rGWpN2JfuANizyForYXN",
+    "message": "dGhpcyBpcyBhbm90aGVyIHRlc3QgbWVzc2FnZQ==",
+    "read_proof": {
+      "nonce": "00000000000000000000000000000000",
+      "hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "read": false
+    }
+  },
+  "status": "OK"
 }
 ```
 
@@ -152,11 +169,20 @@ Retrieves a message to read. [Bash example](./rpc-test/get_message)
 - `destination`: The address that authored the message. 
 - `message`: The text of the message
 
-*NOTE: The [get_message](./rpc-test/get_message) function returns a base64 encoded string. The test script demonstrates the process.*  
+**Notes**
 
-*NOTE: destination changes depending on the `incoming` flag. If true, `destination` is the address that sent you the message. If false, it is your address.*
+The [get_message](./rpc-test/get_message) function returns the message as a base64 encoded string. The test script demonstrates the process.  
 
-## **send_message**
+The output of the `address` field depends on the value of direction.  
+If `direction = "in"`, the address is the address of the party sending the message.  
+If `direction = "out"`, the address is is the address of the party receiving the message.
+
+The output of the `read_proof` field depends on the value of direction.  
+If `direction = "in"`, the read proof will be populated with valid values.  
+If `direction = "out"`, the read proof will zero strings of the correct length.  
+In both cases, the value of `read` can be used to determine if a message is actually read.
+
+### **send_message**
 
 Send a message to another user. [Bash example](./rpc-test/send_message)
 
@@ -179,4 +205,9 @@ Send a message to another user. [Bash example](./rpc-test/send_message)
 
 - `key`: The hash key of the newly created message.  
 
-*NOTE: The [send_message](./rpc-test/send_message) function expects the message data a base64 encoded string. The test script demonstrates the process.*
+**Notes**
+
+The [send_message](./rpc-test/send_message) function expects the message data a base64 encoded string. The test script demonstrates the process.  
+
+This function can take some time to return. After sending the message, it must be hashed with the PoW hashing algorithm on the server side.  
+The function will return in due time when the process is complete.

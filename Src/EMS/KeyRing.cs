@@ -71,20 +71,19 @@ namespace EMS
             return true;
         }
         
-        public static bool DecryptMessage(byte[] input, out string address, out HashKey16 readProofNonce, out HashKey32 readProofHash, out string message)
-        {
-            address = null;
-            readProofNonce = HashKey16.Empty;
-            readProofHash = HashKey32.Empty;
-            message = null;
 
+        // The before being sent for decryption a message should have already been validated
+        // The validation process extracts some message properties, so we pass in the 
+        // validated message to fill the remaining data
+        public static Message DecryptMessage(byte[] input, Message validatedMessage)
+        {
             BinaryReader reader = new BinaryReader(new MemoryStream(input));
             reader.BaseStream.Seek(0, SeekOrigin.Begin);
 
             ushort signatureLength = BitShifter.ToUShort(reader.ReadBytes(2));
             ushort encryptedMessageLength = BitShifter.ToUShort(reader.ReadBytes(2));
             byte[] xorKey = reader.ReadBytes(65);
-            readProofHash = reader.ReadBytes(32);
+            HashKey32 readProofHash = reader.ReadBytes(32);
             byte[] a = new byte[65];
 
             BitArray ba = new BitArray(publicKey);
@@ -95,16 +94,39 @@ namespace EMS
             byte[] signature = reader.ReadBytes(signatureLength);
             byte[] encryptedMessage = reader.ReadBytes(encryptedMessageLength);
 
+            reader.Close();
+
+            // Could not verify the message signature. It isn't ours
+            // So we just send it back
             if (!Ecc.Verify(encryptedMessage, a, signature))
-                return false;
+                return validatedMessage;
 
-            byte[] decrypted = Aes.Decrypt(encryptedMessage, CreateSharedKey(a));
+            byte[] decrypted = null;
 
-            address = Base58.Encode(a);
-            readProofNonce = decrypted.Take(16).ToArray();
-            message = Encoding.ASCII.GetString(decrypted.Skip(16).ToArray());
+            try
+            {
+                decrypted = Aes.Decrypt(encryptedMessage, CreateSharedKey(a));
+            }
+            catch
+            {
+                Log.WriteError("Message decryption error. Message is corrupt");
+            }
 
-            return true;
+            if (decrypted == null)
+                return null;
+
+            HashKey16 readProofNonce = decrypted.Take(16).ToArray();
+            string message = Encoding.ASCII.GetString(decrypted.Skip(16).ToArray());
+
+            validatedMessage.Address = Base58.Encode(a);
+            validatedMessage.ReadProof = new ReadProof
+            {
+                Nonce = readProofNonce,
+                Hash = readProofHash
+            };
+            validatedMessage.DecryptedMessage = message;
+
+            return validatedMessage;
         }
     }
 }

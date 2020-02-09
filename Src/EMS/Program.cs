@@ -78,6 +78,12 @@ namespace EMS
 
 #region Timed events
 
+            //Delete expirated messages, every 5 minutes
+            TimedEventManager.Add("deleteexpired", () =>
+            {
+                //TODO: delete expired messages
+            }, 300 * 1000);
+
             //Check for new seeds via DNS every hour
             TimedEventManager.Add("seeds", () =>
             {
@@ -92,22 +98,26 @@ namespace EMS
             }, 30 * 1000);
 
             // Exchange peer lists with connected peers. Every 10 minutes.
-            //We can have a long period here because we have the reconnect event 
-            //running every 30 seconds in case we lose all our peer list connections
+            // We can have a long period here because we have the reconnect event 
+            // running every 30 seconds in case we lose all our peer list connections
+            // TODO: we should request sequentially to prevent duplicate data being unnecessarily
+            // sent around the network
             TimedEventManager.Add("peers", () =>
             {
                 ConnectionManager.ForEach(Direction.Incoming | Direction.Outgoing, (c) =>
                 {
-                    c.Write(ExchangePeerList.GenerateRequest(true));
+                    c.Write(ExchangePeerList.GenerateRequest(true).ToArray());
                 });
             }, 600 * 1000);
 
             // Request messages from other nodes. Every 5 minutes
+            // TODO: we should request sequentially to prevent duplicate data being unnecessarily
+            // sent around the network
             TimedEventManager.Add("messages", () =>
             {
                 ConnectionManager.ForEach(Direction.Incoming | Direction.Outgoing, (c) =>
                 {
-                    c.Write(RequestMessagePool.GenerateRequest(true));
+                    c.Write(RequestMessagePool.GenerateRequest(true).ToArray());
                 });
             }, 60 * 1000);
 
@@ -123,9 +133,11 @@ namespace EMS
 
             Application.RegisterCommand("sync", "Manually sync new messages from your connected peers", (c) =>
             {
+                // TODO: we should request sequentially to prevent duplicate data being unnecessarily
+                // sent around the network
                 ConnectionManager.ForEach(Direction.Incoming | Direction.Outgoing, (c) =>
                 {
-                    c.Write(RequestMessagePool.GenerateRequest(true));
+                    c.Write(RequestMessagePool.GenerateRequest(true).ToArray());
                 });
 
                 return true;

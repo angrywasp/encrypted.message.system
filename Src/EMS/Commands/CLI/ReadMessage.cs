@@ -16,38 +16,39 @@ namespace EMS.Commands.CLI
 
             HashKey16 key = clp[1].Value.FromByteHex();
 
-            IncomingMessage incomingMessage;
-            OutgoingMessage outgoingMessage;
+            Message message;
 
-            if (MessagePool.IncomingMessages.TryGetValue(key, out incomingMessage))
+            if (!MessagePool.Messages.TryGetValue(key, out message))
             {
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.WriteLine($"From: {incomingMessage.Sender}");
-                Console.WriteLine($"Time: {DateTimeHelper.UnixTimestampToDateTime(incomingMessage.TimeStamp)}");
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine(incomingMessage.Message);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Message not found.");
                 Console.WriteLine();
                 Console.ForegroundColor = ConsoleColor.White;
-                return true;
+                return false;
             }
 
-            if (MessagePool.OutgoingMessages.TryGetValue(key, out outgoingMessage))
+            if (!message.IsDecrypted)
             {
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.WriteLine($"  To: {outgoingMessage.Recipient}");
-                Console.WriteLine($"Time: {DateTimeHelper.UnixTimestampToDateTime(outgoingMessage.TimeStamp)}");
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine(outgoingMessage.Message);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Message is encrypted. Cannot read.");
                 Console.WriteLine();
                 Console.ForegroundColor = ConsoleColor.White;
-                return true;
+                return false;
             }
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Message not found");
+            string direction = "  From:";
+            if (MessagePool.OutgoingMessages.Contains(key))
+                direction = "    To:";
+
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.WriteLine($"{direction} {message.Address}");
+            Console.WriteLine($"  Time: {DateTimeHelper.UnixTimestampToDateTime(message.Timestamp)}");
+            Console.WriteLine($"Expiry: {DateTimeHelper.UnixTimestampToDateTime(message.Timestamp + message.Expiration)}");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(message.DecryptedMessage);
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
-            return false;
+            return true;
         }
     }
 }

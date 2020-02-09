@@ -1,10 +1,11 @@
-using AngryWasp.Helpers;
+// Re-implementation of the difficulty target calculation used by Monero
+// https://github/com/monero-project/monero
 
 namespace EMS
 {
-    public static class Validator
+    public static class PowValidator
     {
-        public static unsafe bool CheckHash(byte[] hash, ulong difficulty)
+        public static unsafe bool Validate(byte[] hash, ulong difficulty)
         {
             ulong low = 0, high = 0, top = 0, cur = 0;
 
@@ -26,12 +27,12 @@ namespace EMS
             }
         }
 
-        static ulong hi_dword(ulong val) => val >> 32;
-        static ulong lo_dword(ulong val) => val & 0xFFFFFFFF;
-        static bool cadd(ulong a, ulong b) => a + b < a;
-        static bool cadc(ulong a, ulong b, bool c) => a + b < a || (c && a + b == ulong.MaxValue);
+        private static ulong hi_dword(ulong val) => val >> 32;
+        private static ulong lo_dword(ulong val) => val & 0xFFFFFFFF;
+        private static bool cadd(ulong a, ulong b) => a + b < a;
+        private static bool cadc(ulong a, ulong b, bool c) => a + b < a || (c && a + b == ulong.MaxValue);
 
-        static ulong mul128(ulong multiplier, ulong multiplicand, ref ulong product_hi)
+        private static ulong mul128(ulong multiplier, ulong multiplicand, ref ulong product_hi)
         {
             ulong a = hi_dword(multiplier);
             ulong b = lo_dword(multiplier);
@@ -53,7 +54,7 @@ namespace EMS
             return product_lo;
         }
 
-        static void mul(ulong a, ulong b, ref ulong low, ref ulong high)
+        private static void mul(ulong a, ulong b, ref ulong low, ref ulong high)
         {
             low = mul128(a, b, ref high);
         }

@@ -23,13 +23,16 @@ The message is contructed of the following data
     - Data length
 
 - Message Body
+    - Message Hash (32 bytes)
+    - Creation timestamp (uint)
+    - Hash nonce (uint)
+    - Expiration age in seconds (uint)
     - Encrypted message signature length (ushort)
     - Encrypted message length (ushort)
     - Address-XOR (65 bytes)
     - Read Proof hash (16 bytes, Keccak128)
     - Message signature (Variable length)
     - Encrypted message content (Variable length)
-        - Timestamp
         - Read Proof nonce
         - Message text
 
@@ -38,6 +41,14 @@ The message is contructed of the following data
 As noted above, the message contains an `Address-XOR`. This is the product of the XOR function between the sender and receiver public key. To validate a message a potential recipient must first XOR their public key with this field to obtain the senders public key. This can then be used to verify the message signature. If this message was not intended for you, the XOR function will return a different key than was used to sign the message and the verification process will fail.
 
 If verification is successful, the senders public key (used to verify the signature) is used to created a shared key with the recipients private key. This shared key will be the same as the one used to encrypt the message and should therefore decrypt the message successfully. 
+
+## Message Expiration
+
+Every message has an expiration time, measured in seconds, which starts from the time the message is first constructed. Each nodes deletes the messages from the pool at 5 minute intervals.
+
+## Proof of Work
+
+Proof of work is used as a means of spam prevention and to prevent message pool bloat. Each message must be hashed with a hashing algorithm until a difficulty target is met. The difficulty target is determined by the expiration time. The longer a message is to live in the pool, the more work that must be done to generate the message hash. A minimum life time of 1 hour is also prescribed by the network as a means of deterring low effort spam messages from flooding the network.
 
 ## Proof of Receipt (Read Proof)
 
@@ -91,11 +102,3 @@ Available options include:
 ## RPC interface
 
 EMS also includes a JSON RPC API. Please refer to the [RPC](./RPC.md) documentation
-
-## TODO
-
-The todo list is too long at this point, however in broad terms, future work should focus on 3 key areas
-
-- Key ring enhancement and the enforcement of single use keys
-- Spam prevention
-- Message lifetime and pool pruning

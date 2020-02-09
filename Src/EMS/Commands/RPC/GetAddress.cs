@@ -11,7 +11,7 @@ namespace EMS.Commands.RPC
             EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
             ret.Response = new JsonResponse
             {
-                PublicKeyBase58 = Base58.Encode(KeyRing.PublicKey),
+                PublicKey= Base58.Encode(KeyRing.PublicKey),
                 PublicKeyHex = KeyRing.PublicKey.ToHex()
             };
 
@@ -29,22 +29,22 @@ namespace EMS.Commands.RPC
         public class JsonRequest
         {
             [JsonProperty("private")]
-            public bool Private { get; set; }
+            public bool Private { get; set; } = false;
         }
 
         public class JsonResponse
         {
             [JsonProperty("public")]
-            public string PublicKeyBase58 { get; set; }
+            public string PublicKey { get; set; } = string.Empty;
 
             [JsonProperty("public_hex")]
-            public string PublicKeyHex { get; set; }
+            public string PublicKeyHex { get; set; } = string.Empty;
 
             [JsonProperty("private")]
-            public string PrivateKey { get; set; }
+            public string PrivateKey { get; set; } = string.Empty;
 
             [JsonProperty("private_hex")]
-            public string PrivateKeyHex { get; set; }
+            public string PrivateKeyHex { get; set; } = string.Empty;
         }
     }
 }

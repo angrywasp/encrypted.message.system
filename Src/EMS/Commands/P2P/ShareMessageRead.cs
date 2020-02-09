@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AngryWasp.Net;
+using AngryWasp.Helpers;
 
 namespace EMS.Commands.P2P
 {
@@ -8,39 +9,42 @@ namespace EMS.Commands.P2P
     {
         public const byte CODE = 13;
 
-        public static byte[] GenerateRequest(bool isRequest, byte[] message)
+        public static List<byte> GenerateRequest(bool isRequest, byte[] message)
         {
-            List<byte> data = new List<byte>();
-            data.AddRange(Header.Create(CODE, isRequest, (ushort)(message.Length)));
-            data.AddRange(message);
-            return data.ToArray();
+            return Header.Create(CODE, isRequest, (ushort)(message.Length))
+                .Join(message);
         }
 
         public static void GenerateResponse(Connection c, Header h, byte[] d)
         {
-            HashKey16 key = d.Take(16).ToArray();
-            HashKey16 readProofKey = d.Skip(16).Take(16).ToArray();
+            HashKey16 messageKey = d.Take(16).ToArray();
+            HashKey16 readProofNonce = d.Skip(16).Take(16).ToArray();
 
-            EncryptedMessage e = null;
-            if (!MessagePool.EncryptedMessages.TryGetValue(key, out e))
+            Message msg = null;
+            if (!MessagePool.Messages.TryGetValue(messageKey, out msg))
             {
                 Log.WriteWarning($"{CommandCode.CommandString(CODE)}: Verification failed. Orphan");
                 c.AddFailure();
                 return;
             }
 
-            HashKey32 readProofHash = ProvableMessage.GenerateHash(readProofKey);
+            HashKey32 readProofHash = ReadProof.GenerateHash(readProofNonce);
             
-            if (readProofHash != e.ExtractReadProofHash())
+            if (readProofHash != msg.ExtractReadProofHash())
             {
                 Log.WriteError($"{CommandCode.CommandString(CODE)}: Verification failed. Mismatched hash");
                 c.AddFailure();
                 return;
             }
 
-            e.SetReadProof(readProofKey, readProofHash);
+            msg.ReadProof = new ReadProof
+            {
+                Nonce = readProofNonce,
+                Hash = readProofHash,
+                IsRead = true
+            };
 
-            byte[] req = ShareMessageRead.GenerateRequest(true, d);
+            byte[] req = ShareMessageRead.GenerateRequest(true, d).ToArray();
 
             ConnectionManager.ForEach(Direction.Incoming | Direction.Outgoing, (con) =>
             {

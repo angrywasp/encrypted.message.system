@@ -6,12 +6,19 @@ namespace EMS.Commands.RPC
     {
         public static bool Handle(object json, out object jsonResult)
         {
+            int total = MessagePool.Messages.Count;
+            int decrypted = 0;
+
+            foreach (var m in MessagePool.Messages)
+            {
+                if (m.Value.IsDecrypted)
+                    ++decrypted;
+            }
             EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
             ret.Response = new JsonResponse
             {
-                Encrypted = MessagePool.EncryptedMessages.Count,
-                Incoming = MessagePool.IncomingMessages.Count,
-                Outgoing = MessagePool.OutgoingMessages.Count
+                Total = total,
+                Decrypted = decrypted
             };
 
             jsonResult = ret;
@@ -21,14 +28,11 @@ namespace EMS.Commands.RPC
 
         public class JsonResponse
         {
-            [JsonProperty("encrypted")]
-            public int Encrypted { get; set; }
+            [JsonProperty("total")]
+            public int Total { get; set; } = 0;
 
-            [JsonProperty("incoming")]
-            public int Incoming { get; set; }
-
-            [JsonProperty("outgoing")]
-            public int Outgoing { get; set; }
+            [JsonProperty("decrypted")]
+            public int Decrypted { get; set; } = 0;
         }
     }
 }

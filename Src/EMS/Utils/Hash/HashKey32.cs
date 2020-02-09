@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using AngryWasp.Cryptography;
 using AngryWasp.Helpers;
+using Newtonsoft.Json;
 
 namespace EMS
 {
+    [JsonConverter(typeof(HashKey32JsonConverer))]
     public struct HashKey32 : IReadOnlyList<byte>, IEquatable<HashKey32>, IEquatable<byte[]>
     {
         private readonly byte[] value;
@@ -103,6 +105,8 @@ namespace EMS
         public static implicit operator HashKey32(byte[] value) => new HashKey32(value);
 
         public static implicit operator byte[](HashKey32 value) => value.ToByte();
+
+        public static implicit operator List<byte>(HashKey32 value) => value.ToList();
 
         public static implicit operator HashKey32(List<byte> value) => new HashKey32(value.ToArray());
         

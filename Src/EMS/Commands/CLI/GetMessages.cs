@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AngryWasp.Helpers;
 
 namespace EMS.Commands.CLI
@@ -7,90 +8,81 @@ namespace EMS.Commands.CLI
     {
         public static bool Handle(string[] cmd)
         {
-            
-#region Encrypted
 
+            List<Message> encrypted = new List<Message>();
+            List<Message> decrypted = new List<Message>();
+
+            foreach (var m in MessagePool.Messages)
+            {
+                if (m.Value.IsDecrypted)
+                    decrypted.Add(m.Value);
+                else
+                    encrypted.Add(m.Value);
+            }
+            
             Console.ForegroundColor = ConsoleColor.DarkGreen;
             Console.WriteLine("Encrypted:");
             Console.ForegroundColor = ConsoleColor.Green;
 
-            int count = 0;
-            foreach (var m in MessagePool.EncryptedMessages)
-            {
-                if (m.Value.HasReadProof())
-                    Console.WriteLine($"  Read: {m.Key}");
-                else
-                    Console.WriteLine($"Unread: {m.Key}");
-                ++count;
-            }
-
-            if (count == 0)
+            if (DisplayList(encrypted) == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("  None");
+                Console.WriteLine();
             }
 
-#endregion
-
-            Console.WriteLine();
-
-#region Incoming
-
             Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine("Incoming:");
+            Console.WriteLine("Decrypted:");
             Console.ForegroundColor = ConsoleColor.Green;
 
-            count = 0;
-            foreach (var m in MessagePool.IncomingMessages)
+            if (DisplayList(decrypted) == 0)
             {
-                if (m.Value.IsRead)
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("  None");
+                Console.WriteLine();
+            }
+            
+            Console.ForegroundColor = ConsoleColor.White;
+
+            return true;
+        }
+
+        private static int DisplayList(List<Message> messages)
+        {
+            int count = 0;
+
+            foreach (var m in messages)
+            {
+                if (m.ReadProof != null && m.ReadProof.IsRead)
                     Console.WriteLine($"  Read: {m.Key}");
                 else
                     Console.WriteLine($"Unread: {m.Key}");
                     
-                Console.WriteLine($"  Time: {DateTimeHelper.UnixTimestampToDateTime(m.Value.TimeStamp)}");
-                Console.WriteLine($"Expiry: {DateTimeHelper.UnixTimestampToDateTime(m.Value.TimeStamp + m.Value.Expiration)}");
-                Console.WriteLine($"  From: {m.Value.Sender}");
+                Console.WriteLine($"  Time: {DateTimeHelper.UnixTimestampToDateTime(m.Timestamp)}");
+                Console.WriteLine($"Expiry: {DateTimeHelper.UnixTimestampToDateTime(m.Timestamp + m.Expiration)}");
+
+                if (m.IsDecrypted)
+                {
+                    bool incoming = true;
+                    if (MessagePool.OutgoingMessages.Contains(m.Key))
+                        incoming = false;
+
+                    Console.WriteLine($"{(incoming ? "  From:" : "    To:")} {m.Address}");
+
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    if (incoming)
+                        Console.WriteLine("        Incoming message");
+                    else
+                        Console.WriteLine("        Outgoing message");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }
+
+                Console.WriteLine();
+                
                 ++count;
             }
 
-            if (count == 0)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("  None");
-            }
-
-#endregion
-
-            Console.WriteLine();
-
-#region Outgoing
-
-            Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine("Outgoing:");
-            Console.ForegroundColor = ConsoleColor.Green;
-
-            count = 0;
-            foreach (var m in MessagePool.OutgoingMessages)
-            {
-                Console.WriteLine($"  Hash: {m.Key}");
-                Console.WriteLine($"  Time: {DateTimeHelper.UnixTimestampToDateTime(m.Value.TimeStamp)}");
-                Console.WriteLine($"    To: {m.Value.Recipient}");
-                ++count;
-            }
-
-            if (count == 0)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("  None");
-            }
-
-#endregion
-
-            Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.White;
-
-            return true;
+            return count;
         }
     }
 }

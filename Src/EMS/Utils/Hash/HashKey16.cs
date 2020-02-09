@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using AngryWasp.Cryptography;
 using AngryWasp.Helpers;
+using Newtonsoft.Json;
 
 namespace EMS
-{
+{   
+    [JsonConverter(typeof(HashKey16JsonConverer))]
     public struct HashKey16 : IReadOnlyList<byte>, IEquatable<HashKey16>, IEquatable<byte[]>
     {
         private readonly byte[] value;
@@ -95,6 +97,8 @@ namespace EMS
         public static implicit operator HashKey16(byte[] value) => new HashKey16(value);
 
         public static implicit operator byte[](HashKey16 value) => value.ToByte();
+
+        public static implicit operator List<byte>(HashKey16 value) => value.ToList();
 
         public static implicit operator HashKey16(List<byte> value) => new HashKey16(value.ToArray());
 

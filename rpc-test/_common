@@ -40,7 +40,6 @@ function print_response_data()
 
 function send_request()
 {
-    
     data=$(curl -s -w " %{http_code}" -X GET http://127.0.0.1:${PORT}/$1 \
     -d '{"api":1,"request":'$2'}' \
     -H 'Content-Type: application/json')

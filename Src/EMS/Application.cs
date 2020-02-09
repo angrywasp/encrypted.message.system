@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using AngryWasp.Helpers;
 
 namespace EMS
@@ -35,6 +36,7 @@ namespace EMS
                         continue;
                     }
 
+                    //convert to array to make a copy before clearing the original list
                     var logMessages = Log.Buffer.ToArray();
                     Log.Buffer.Clear();
 
@@ -118,11 +120,12 @@ namespace EMS
 
                         Console.CursorLeft = 0;
                         Console.Write(new string(' ', Console.WindowWidth));
+                        Console.CursorLeft = 0;
+                        Console.Write("> ");
 
                         if (lineIndex < lines.Count)
                         {
-                            Console.CursorLeft = 0;
-                            Console.Write("> " + lines[lineIndex]);
+                            Console.Write(lines[lineIndex]);
                             noPrompt = true;
                         }
 
