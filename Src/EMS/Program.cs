@@ -6,6 +6,7 @@ using EMS.Commands.RPC;
 using EMS.Commands.CLI;
 using DnsClient;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace EMS
 {
@@ -81,7 +82,21 @@ namespace EMS
             //Delete expirated messages, every 5 minutes
             TimedEventManager.Add("deleteexpired", () =>
             {
-                //TODO: delete expired messages
+                HashSet<HashKey16> delete = new HashSet<HashKey16>();
+
+                foreach (var m in MessagePool.Messages)
+                {
+                    if (m.Value.IsExpired())
+                        delete.Add(m.Key);
+                }
+
+                foreach (var k in delete)
+                {
+                    Message m;
+                    MessagePool.Messages.TryRemove(k, out m);
+                    if (MessagePool.OutgoingMessages.Contains(k))
+                        MessagePool.OutgoingMessages.Remove(k);
+                }
             }, 300 * 1000);
 
             //Check for new seeds via DNS every hour

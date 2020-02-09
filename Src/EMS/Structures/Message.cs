@@ -1,4 +1,5 @@
 using System.Linq;
+using AngryWasp.Helpers;
 
 namespace EMS
 {
@@ -19,9 +20,8 @@ namespace EMS
             get { return !string.IsNullOrEmpty(Address) && !string.IsNullOrEmpty(DecryptedMessage); }
         }
 
-        public HashKey32 ExtractReadProofHash()
-        {
-            return Data.Skip(113).Take(32).ToArray();
-        }
+        public HashKey32 ExtractReadProofHash() => Data.Skip(113).Take(32).ToArray();
+
+        public bool IsExpired() => (Timestamp + Expiration) > DateTimeHelper.TimestampNow();
     }
 }
