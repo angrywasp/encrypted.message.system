@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../EMS.targets"/>
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <AssemblyName>EMS.Rpc.CSharp</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="*"/>
+  </ItemGroup>
+</Project>
