@@ -3,7 +3,15 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source ${dir}/_common
 
 data=$(send_request_no_param get_message_details)
+ret=$?
 
 print_request_data_no_param
+
+if [ "${ret}" == 1 ]; then 
+    echo ""
+    echo "Request failed."
+    exit 1
+fi
+
 echo ""
 print_response_data ${data}

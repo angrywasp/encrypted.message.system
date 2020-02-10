@@ -2,22 +2,19 @@
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source ${dir}/_common
 
-# Call without private data
-request='{"private":false}'
-
-data=$(send_request get_address ${request})
-
-print_request_data ${request}
-echo ""
-print_response_data ${data}
-
-echo ""
-
 # Call with private data
 request='{"private":true}'
 
 data=$(send_request get_address ${request})
+ret=$?
 
 print_request_data ${request}
+
+if [ "${ret}" == 1 ]; then 
+    echo ""
+    echo "Request failed."
+    exit 1
+fi
+
 echo ""
 print_response_data ${data}

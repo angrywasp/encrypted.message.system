@@ -6,8 +6,16 @@ key=$1
 request='{"key":"'${key}'"}'
 
 data=$(send_request get_message ${request})
+ret=$?
 
 print_request_data ${request}
+
+if [ "${ret}" == 1 ]; then 
+    echo ""
+    echo "Request failed."
+    exit 1
+fi
+
 echo ""
 print_response_data ${data}
 

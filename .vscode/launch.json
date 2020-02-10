@@ -2,6 +2,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Bash-Debug",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/rpc-test/get_address",
+            "args": []
+        },
+        {
             "name": "SeedNode",
             "type": "coreclr",
             "request": "launch",

@@ -1,13 +1,22 @@
 #!/bin/bash
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-function check_http_status()
+export PORT=4500
+
+function check_response()
 {
-    #check error code
-    if [ $1 != 200 ]; then
-        echo "Bad request"
-        exit
+    data=("$@")
+    len=${#data[@]}
+    if [ "${len}" != 2 ]; then
+        return 1
+    else
+        #check error code
+        if [ "${data[1]}" != 200 ]; then
+            return 1
+        fi 
     fi
+
+    return 0
 }
 
 function print_request_data()
@@ -30,7 +39,7 @@ function print_request_data_no_param()
     echo ${req} | jq .
 }
 
-function print_response_data()
+function print_response_data
 {
     echo "==========================================="
     echo "Response"
@@ -45,18 +54,21 @@ function send_request()
     -H 'Content-Type: application/json')
 
     data=(${data[@]})
-    check_http_status ${data[1]}
+    check_response ${data[@]}
+    ret=$?
     echo ${data[0]}
+    return ${ret}
 }
 
 function send_request_no_param()
 {
-    
     data=$(curl -s -w " %{http_code}" -X GET http://127.0.0.1:${PORT}/$1 \
     -d '{"api":1}' \
     -H 'Content-Type: application/json')
 
     data=(${data[@]})
-    check_http_status ${data[1]}
+    check_response ${data[@]}
+    ret=$?
     echo ${data[0]}
+    return ${ret}
 }
