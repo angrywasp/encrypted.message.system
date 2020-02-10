@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AngryWasp.Helpers;
+using System.Linq;
 
 namespace EMS.Commands.CLI
 {
@@ -10,15 +11,25 @@ namespace EMS.Commands.CLI
         {
 
             List<Message> encrypted = new List<Message>();
-            List<Message> decrypted = new List<Message>();
+            List<Message> incoming = new List<Message>();
+            List<Message> outgoing = new List<Message>();
 
             foreach (var m in MessagePool.Messages)
             {
                 if (m.Value.IsDecrypted)
-                    decrypted.Add(m.Value);
+                {
+                    if (MessagePool.OutgoingMessages.Contains(m.Key))
+                        outgoing.Add(m.Value);
+                    else
+                        incoming.Add(m.Value);
+                }
                 else
                     encrypted.Add(m.Value);
             }
+
+            encrypted = encrypted.OrderBy(x => x.Timestamp).ToList();
+            incoming = incoming.OrderBy(x => x.Timestamp).ToList();
+            outgoing = outgoing.OrderBy(x => x.Timestamp).ToList();
             
             Console.ForegroundColor = ConsoleColor.DarkGreen;
             Console.WriteLine("Encrypted:");
@@ -32,10 +43,21 @@ namespace EMS.Commands.CLI
             }
 
             Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine("Decrypted:");
+            Console.WriteLine("Outgoing:");
             Console.ForegroundColor = ConsoleColor.Green;
 
-            if (DisplayList(decrypted) == 0)
+            if (DisplayList(outgoing) == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("  None");
+                Console.WriteLine();
+            }
+
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.WriteLine("Incoming:");
+            Console.ForegroundColor = ConsoleColor.Green;
+
+            if (DisplayList(incoming) == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("  None");
@@ -68,13 +90,6 @@ namespace EMS.Commands.CLI
                         incoming = false;
 
                     Console.WriteLine($"{(incoming ? "  From:" : "    To:")} {m.Address}");
-
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    if (incoming)
-                        Console.WriteLine("        Incoming message");
-                    else
-                        Console.WriteLine("        Outgoing message");
-                    Console.ForegroundColor = ConsoleColor.Green;
                 }
 
                 Console.WriteLine();

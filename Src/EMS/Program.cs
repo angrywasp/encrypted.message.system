@@ -71,6 +71,8 @@ namespace EMS
                 }
             }
 
+            AddSeedFromDns();
+
             new Server().Start(p2pPort);
             new RpcServer().Start(rpcPort, rpcSslPort);
 
@@ -184,9 +186,8 @@ namespace EMS
                 if (node.Length > 1)
                     ushort.TryParse(node[1], out port);
 
-                foreach (var s in AngryWasp.Net.Config.SeedNodes)
-                    if (s.Host == host && s.Port == port)
-                        continue;
+                if (AngryWasp.Net.Config.HasSeedNode(host, port))
+                    continue;
 
                 AngryWasp.Net.Config.AddSeedNode(host, port);
                 Log.WriteConsole($"Added seed node {host}:{port}");
