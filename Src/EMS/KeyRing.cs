@@ -15,7 +15,7 @@ namespace EMS
         public static byte[] PrivateKey => privateKey;
         public static byte[] PublicKey => publicKey;
 
-        public static void LoadFromFile(string path)
+        public static void Initialize(string path)
         {
             if (string.IsNullOrEmpty(path))
                 Ecc.GenerateKeyPair(out publicKey, out privateKey);

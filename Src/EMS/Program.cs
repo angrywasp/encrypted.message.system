@@ -21,7 +21,7 @@ namespace EMS
 
             bool noReconnect = false;
 
-            KeyRing.LoadFromFile(cmd["--key-file"] != null ? cmd["--key-file"].Value : null);
+            KeyRing.Initialize(cmd["--key-file"] != null ? cmd["--key-file"].Value : null);
 
             CommandCode.AddExternalHandler((b) =>
             {
@@ -143,6 +143,7 @@ namespace EMS
             Application.RegisterCommand("exit", "Exit the program", Exit.Handle);
             Application.RegisterCommand("send", "Send a message. Usage: Send <address> \"<message>\"", Commands.CLI.SendMessage.Handle);
             Application.RegisterCommand("address", "Prints your messaging address", Commands.CLI.GetAddress.Handle);
+            Application.RegisterCommand("new_address", "Discards your current address and creates a new one", Commands.CLI.NewAddress.Handle);
             Application.RegisterCommand("peers", "Print a list of connected peers", Commands.CLI.GetPeers.Handle);
             Application.RegisterCommand("messages", "Print the message pool", Commands.CLI.GetMessages.Handle);
             Application.RegisterCommand("read", "Read a message. Usage: read <message_hash>", Commands.CLI.ReadMessage.Handle);
