@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using AngryWasp.Helpers;
@@ -41,7 +40,7 @@ namespace EMS
             }
 
             //the hash matches, but is it valid for the provided expiration time?
-            if (expiration < GlobalConfig.MIN_MESSAGE_EXPIRATION || !PowValidator.Validate(compare, expiration * GlobalConfig.DIFF_MULTIPLIER))
+            if (expiration < Config.MIN_MESSAGE_EXPIRATION || !PowValidator.Validate(compare, expiration * Config.DIFF_MULTIPLIER))
             {
                 Log.WriteError($"Message failed validation. Invalid expiration time, {compare}");
                 return null;
@@ -50,14 +49,14 @@ namespace EMS
             //FTL check, but only if we are verifying a message received through the ShareMessage p2p command
             //If we are receiving this via RequestMessagePool, we must skip this verification as we are pulling old
             //Messages and this check will in most cases fail
-            if (verifyFtl && ((uint)Math.Abs(timestamp - (uint)DateTimeHelper.TimestampNow()) > GlobalConfig.FTL))
+            if (verifyFtl && ((uint)Math.Abs(timestamp - (uint)DateTimeHelper.TimestampNow()) > Config.FTL))
             {
                 Log.WriteError($"Message failed validation. Outside future time limit");
                 return null;
             }
             
             //Make sure expiration is the minimum
-            if (expiration < GlobalConfig.MIN_MESSAGE_EXPIRATION)
+            if (expiration < Config.MIN_MESSAGE_EXPIRATION)
             {
                 Log.WriteError($"Message failed validation. Short life span");
                 return null;

@@ -21,6 +21,8 @@
   <ItemGroup>
     <ProjectReference Include="../../External/AngryWasp.Net/Src/AngryWasp.Net/AngryWasp.Net.csproj"/>
     <ProjectReference Include="../../External/AngryWasp.Cryptography/Src/AngryWasp.Cryptography/AngryWasp.Cryptography.csproj"/>
+    <ProjectReference Include="../../External/AngryWasp.Serializer/Src/AngryWasp.Serializer/AngryWasp.Serializer.csproj"/>
+    <ProjectReference Include="../../External/AngryWasp.Serializer/Src/AngryWasp.Serializer.Serializers/AngryWasp.Serializer.Serializers.csproj"/>
   </ItemGroup>
   <ItemGroup>
     <Content Include="../../LICENSE.txt">

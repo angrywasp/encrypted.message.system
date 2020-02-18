@@ -9,7 +9,6 @@ namespace EMS.Commands.CLI
     {
         public static bool Handle(string[] cmd)
         {
-
             List<Message> encrypted = new List<Message>();
             List<Message> incoming = new List<Message>();
             List<Message> outgoing = new List<Message>();

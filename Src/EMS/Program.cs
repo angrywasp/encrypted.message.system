@@ -7,6 +7,7 @@ using EMS.Commands.CLI;
 using DnsClient;
 using System.Linq;
 using System.Collections.Generic;
+using AngryWasp.Serializer;
 
 namespace EMS
 {
@@ -16,12 +17,13 @@ namespace EMS
         public static void Main(string[] args)
         {
             CommandLineParser cmd = CommandLineParser.Parse(args);
-
-            Log.Create(cmd["--log-file"] != null ? cmd["--log-file"].Value : null);
-
             bool noReconnect = false;
-
+            
+            Log.Initialize(cmd["--log-file"] != null ? cmd["--log-file"].Value : null);
+            Serializer.Initialize();
+            
             KeyRing.Initialize(cmd["--key-file"] != null ? cmd["--key-file"].Value : null);
+            Config.Initialize(cmd["--config-file"] != null ? cmd["--config-file"].Value : null);
 
             CommandCode.AddExternalHandler((b) =>
             {
@@ -148,6 +150,8 @@ namespace EMS
             Application.RegisterCommand("messages", "Print the message pool", Commands.CLI.GetMessages.Handle);
             Application.RegisterCommand("read", "Read a message. Usage: read <message_hash>", Commands.CLI.ReadMessage.Handle);
             Application.RegisterCommand("flag", "Mark a message as read. Usage: flag <message_hash>", Commands.CLI.MarkMessageRead.Handle);
+            Application.RegisterCommand("get", "Get a config option value. Usage: get <param>", Commands.CLI.GetConfig.Handle);
+            Application.RegisterCommand("set", "Set a config option value. Usage: set <param> <value>", Commands.CLI.SetConfig.Handle);
 
             Application.RegisterCommand("sync", "Manually sync new messages from your connected peers", (c) =>
             {

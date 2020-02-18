@@ -12,7 +12,7 @@ namespace EMS
 
         public static List<Tuple<ConsoleColor, string>> Buffer => bufferWriter.Buffer;
 
-        public static void Create(string logFile)
+        public static void Initialize(string logFile)
         {
             L.CreateInstance(false, logFile);
 
