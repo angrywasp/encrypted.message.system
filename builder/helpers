@@ -1,0 +1,21 @@
+#!/bin/bash
+
+BUILDER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR=$(dirname $BUILDER_DIR)
+
+function detect_version()
+{
+    ver=$(awk '/public const string VERSION = /{ print $6 }' < ${ROOT_DIR}/Src/EMS/Version.cs)
+	name=$(awk '/public const string CODE_NAME = /{ print $6 }' < ${ROOT_DIR}/Src/EMS/Version.cs)
+    export APP_VERSION=$(echo ${ver} | tr -d '";')
+	export APP_CODENAME=$(echo ${name} | tr -d '";')
+    echo App version detected as ${APP_VERSION}: ${APP_CODENAME}
+}
+
+function clean_build_artifacts()
+{
+    find ${ROOT_DIR}/External -iname "bin" -o -iname "obj" | xargs rm -rf
+    find ${ROOT_DIR}/Src -iname "bin" -o -iname "obj" | xargs rm -rf
+}
+
+detect_version

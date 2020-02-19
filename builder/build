@@ -1,0 +1,32 @@
+#!/bin/bash
+
+BUILDER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source ${BUILDER_DIR}/helpers
+
+function clean()
+{
+    clean_build_artifacts
+}
+
+function debug()
+{
+    dotnet build /p:TargetFramework=netcoreapp3.1 \
+    /p:GenerateFullPaths=true /p:Configuration=Debug /p:TrimUnusedDependencies=true \
+    ${ROOT_DIR}/Src/EMS/EMS.csproj
+}
+
+function release()
+{
+    dotnet build /p:TargetFramework=netcoreapp3.1 \
+    /p:GenerateFullPaths=true /p:Configuration=Release /p:TrimUnusedDependencies=true \
+    ${ROOT_DIR}/Src/EMS/EMS.csproj
+}
+
+function publish()
+{
+    dotnet publish /p:TargetFramework=netcoreapp3.1 /p:Publish=true \
+    /p:GenerateFullPaths=true /p:Configuration=Release /p:TrimUnusedDependencies=true \
+    ${ROOT_DIR}/Src/EMS/EMS.csproj
+}
+
+$1

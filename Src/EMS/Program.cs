@@ -18,6 +18,8 @@ namespace EMS
         {
             CommandLineParser cmd = CommandLineParser.Parse(args);
             bool noReconnect = false;
+
+            Console.Title = $"EMS {Version.VERSION}: {Version.CODE_NAME}";
             
             Log.Initialize(cmd["--log-file"] != null ? cmd["--log-file"].Value : null);
             Serializer.Initialize();

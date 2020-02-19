@@ -1,6 +1,5 @@
 <Project>
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
@@ -17,6 +16,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Net.Sockets" Version="*"/>
+    <PackageReference Include="Newtonsoft.Json" Version="*"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../External/AngryWasp.Net/Src/AngryWasp.Net/AngryWasp.Net.csproj"/>
