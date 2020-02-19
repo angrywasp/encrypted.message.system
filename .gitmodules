@@ -7,3 +7,6 @@
 [submodule "External/AngryWasp.Serializer"]
 	path = External/AngryWasp.Serializer
 	url = https://bitbucket.org/angrywasp/angrywasp.serializer
+[submodule "External/AngryWasp.Build"]
+	path = External/AngryWasp.Build
+	url = https://bitbucket.org/angrywasp/angrywasp.build
