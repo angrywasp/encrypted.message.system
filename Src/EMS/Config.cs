@@ -15,17 +15,24 @@ namespace EMS
         //Give messages a minimum life and enforce it to prevent spamming the network with short lived, low diff messages
         public const uint MIN_MESSAGE_EXPIRATION = 3600;
 
+        public const string DEFAULT_CONFIG_FILE = "app.config";
+
         private static UserConfig user = null;
+        private static string userConfigFile = DEFAULT_CONFIG_FILE;
 
         public static UserConfig User => user;
 
-        public static void Initialize(string file)
+        public static void Initialize(string file = DEFAULT_CONFIG_FILE)
         {
-            if (string.IsNullOrEmpty(file) || !File.Exists(file))
+            userConfigFile = file;
+
+            if (!File.Exists(file))
                 user = new UserConfig();
             else
                 user = new ObjectSerializer().Deserialize<UserConfig>(XDocument.Load(file));
         }
+
+        public static void Save() => new ObjectSerializer().Serialize(user, userConfigFile);
     }
 
     public class UserConfig

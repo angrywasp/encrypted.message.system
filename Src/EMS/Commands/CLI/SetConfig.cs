@@ -40,6 +40,8 @@ namespace EMS.Commands.CLI
             object value = Serializer.Deserialize(pi.PropertyType, propValue);
             pi.SetValue(Config.User, value);
 
+            Config.Save();
+
             return true;
         }
     }
