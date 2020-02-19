@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using AngryWasp.Helpers;
 
 namespace EMS
@@ -89,14 +88,17 @@ namespace EMS
                         }
 
                         lastLineIndex = lineIndex;
+                        int top = Console.CursorTop;
 
                         Console.CursorLeft = 0;
                         Console.Write(new string(' ', Console.WindowWidth));
+                        Console.CursorLeft = 0;
+                        Console.CursorTop = top;
+                        Console.Write("> ");
 
                         if (lineIndex < lines.Count)
                         {
-                            Console.CursorLeft = 0;
-                            Console.Write("> " + lines[lineIndex]);
+                            Console.Write(lines[lineIndex]);
                             noPrompt = true;
                         }
 
@@ -117,10 +119,12 @@ namespace EMS
                         }
 
                         lastLineIndex = lineIndex;
+                        int top = Console.CursorTop;
 
                         Console.CursorLeft = 0;
                         Console.Write(new string(' ', Console.WindowWidth));
                         Console.CursorLeft = 0;
+                        Console.CursorTop = top;
                         Console.Write("> ");
 
                         if (lineIndex < lines.Count)
