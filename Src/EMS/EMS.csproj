@@ -3,6 +3,9 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup Condition="$(Publish) == 'true'">
+    <AssemblyName>ems</AssemblyName>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DnsClient" Version="*"/>
     <PackageReference Include="System.Net.Sockets" Version="*"/>

@@ -20,27 +20,47 @@ function clean_build_artifacts()
 
 function clean()
 {
+    cd ${ROOT_DIR}
     clean_build_artifacts
 }
 
 function debug()
 {
+    cd ${ROOT_DIR}
     dotnet build                        \
     /p:Configuration=Debug
 }
 
 function release()
 {
+    cd ${ROOT_DIR}
     dotnet build                        \
     /p:Configuration=Release
 }
 
 function publish()
 {
+    cd ${ROOT_DIR}
     dotnet publish                      \
     /p:RuntimeIdentifier=$1-x64         \
     /p:Configuration=Release            \
     /p:Publish=true
+}
+
+function publish_all()
+{
+    publish linux
+    publish win
+    publish osx
+
+    cd ${ROOT_DIR}/Bin/Release/netcoreapp3.1/linux-x64/publish
+    zip ${ROOT_DIR}/Bin/ems-v${APP_VERSION}_linux.zip ./ems
+
+    cd ${ROOT_DIR}/Bin/Release/netcoreapp3.1/win-x64/publish
+    zip ${ROOT_DIR}/Bin/ems-v${APP_VERSION}_windows.zip ./ems.exe
+
+    cd ${ROOT_DIR}/Bin/Release/netcoreapp3.1/osx-x64/publish
+    zip ${ROOT_DIR}/Bin/ems-v${APP_VERSION}_osx.zip ./ems
 }
 
 detect_version
