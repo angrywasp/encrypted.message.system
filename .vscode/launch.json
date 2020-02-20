@@ -13,10 +13,9 @@
             "name": "SeedNode",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/Bin/Debug/EMS.dll",
+            "program": "${workspaceRoot}/Bin/Debug/netcoreapp3.1/EMS",
             "cwd": "${workspaceRoot}/Bin",
             "console": "externalTerminal",
-            "preLaunchTask": "build-debug",
             "args":[
                 "--p2p-port", "3500", 
                 "--rpc-port", "4500",
@@ -28,7 +27,7 @@
             "name": "Node-1",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/Bin/Debug/EMS.dll",
+            "program": "${workspaceRoot}/Bin/Debug/netcoreapp3.1/EMS",
             "cwd": "${workspaceRoot}/Bin",
             "console": "externalTerminal",
             "args":[
@@ -42,7 +41,7 @@
             "name": "Node-2",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/Bin/Debug/EMS.dll",
+            "program": "${workspaceRoot}/Bin/Debug/netcoreapp3.1/EMS",
             "cwd": "${workspaceRoot}/Bin",
             "console": "externalTerminal",
             "args":[
@@ -56,7 +55,7 @@
             "name": "Node-3",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/Bin/Debug/EMS.dll",
+            "program": "${workspaceRoot}/Bin/Debug/netcoreapp3.1/EMS",
             "cwd": "${workspaceRoot}/Bin",
             "console": "externalTerminal",
             "args":[

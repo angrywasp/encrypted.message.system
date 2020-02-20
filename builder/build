@@ -10,23 +10,18 @@ function clean()
 
 function debug()
 {
-    dotnet build /p:TargetFramework=netcoreapp3.1 \
-    /p:GenerateFullPaths=true /p:Configuration=Debug /p:TrimUnusedDependencies=true \
-    ${ROOT_DIR}/Src/EMS/EMS.csproj
+    dotnet build                    \
+    /p:GenerateFullPaths=true       \
+    /p:Configuration=Debug          \
+    /p:TrimUnusedDependencies=true
 }
 
 function release()
 {
-    dotnet build /p:TargetFramework=netcoreapp3.1 \
-    /p:GenerateFullPaths=true /p:Configuration=Release /p:TrimUnusedDependencies=true \
-    ${ROOT_DIR}/Src/EMS/EMS.csproj
-}
-
-function publish()
-{
-    dotnet publish /p:TargetFramework=netcoreapp3.1 /p:Publish=true \
-    /p:GenerateFullPaths=true /p:Configuration=Release /p:TrimUnusedDependencies=true \
-    ${ROOT_DIR}/Src/EMS/EMS.csproj
+    dotnet build                    \
+    /p:GenerateFullPaths=true       \
+    /p:Configuration=Release        \
+    /p:TrimUnusedDependencies=true
 }
 
 $1
