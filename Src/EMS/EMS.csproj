@@ -1,14 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../External/AngryWasp.Build/AngryWasp.Build.Common.targets"/>
+  <Import Project="../../External/AngryWasp.Build/AngryWasp.Build.Application.targets"/>
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
-    <OutputType>Exe</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(TargetFramework) == 'netcoreapp3.1' and $(Publish) == 'true'">
-    <PublishTrimmed>true</PublishTrimmed>
-    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
-    <PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DnsClient" Version="*"/>

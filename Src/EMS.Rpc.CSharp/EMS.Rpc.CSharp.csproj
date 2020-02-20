@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../External/AngryWasp.Build/AngryWasp.Build.Common.targets"/>
-  <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
-    <OutputType>Library</OutputType>
-  </PropertyGroup>
-</Project>
