@@ -5,7 +5,7 @@ namespace EMS.Commands.CLI
 {
     public class GetPeers
     {
-        public static bool Handle(string[] cmd)
+        public static bool Handle(string command)
         {
             
 #region Incoming

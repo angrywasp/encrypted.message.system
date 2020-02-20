@@ -9,19 +9,18 @@ namespace EMS
     {
         public delegate bool CliFunc<T>(T arg);
 
-        private static Dictionary<string, Tuple<string, CliFunc<string[]>>> commands = new Dictionary<string, Tuple<string, CliFunc<string[]>>>();
+        private static Dictionary<string, Tuple<string, CliFunc<string>>> commands = new Dictionary<string, Tuple<string, CliFunc<string>>>();
 
-        public static Dictionary<string, Tuple<string, CliFunc<string[]>>> Commands => commands;
+        public static Dictionary<string, Tuple<string, CliFunc<string>>> Commands => commands;
 
-        public static void RegisterCommand(string key, string helpText, CliFunc<string[]> handler)
+        public static void RegisterCommand(string key, string helpText, CliFunc<string> handler)
         {
             if (!commands.ContainsKey(key))
-                commands.Add(key, new Tuple<string, CliFunc<string[]>>(helpText, handler));
+                commands.Add(key, new Tuple<string, CliFunc<string>>(helpText, handler));
         }
 
         public static void Start()
         {
-            
             bool noPrompt = false;
             List<char> enteredText = new List<char>();
 
@@ -150,23 +149,23 @@ namespace EMS
                     }
                     else if (key.Key == ConsoleKey.Enter)
                     {
-                        string s = new string(enteredText.ToArray());
+                        string line = new string(enteredText.ToArray());
+                        string commandString = new string(enteredText.ToArray());
                         enteredText.Clear();
                         Console.WriteLine();
-                        string[] args = Helpers.SplitArguments(s);
-                        if (args.Length > 0)
-                        {
-                            if (commands.ContainsKey(args[0]))
-                            {
-                                if (!commands[args[0]].Item2.Invoke(args))
-                                    Log.WriteError("Command failed");
-                            }
-                            else
-                                Log.WriteError("Unknown command");
-                        }
                         
-                        if (!string.IsNullOrEmpty(s))
-                            lines.Add(s);
+                        string cmd = Helpers.PopWord(ref commandString);
+
+                        if (commands.ContainsKey(cmd))
+                        {
+                            if (!commands[cmd].Item2.Invoke(commandString))
+                                Log.WriteError("Command failed");
+                        }
+                        else
+                            Log.WriteError("Unknown command");
+                        
+                        if (!string.IsNullOrEmpty(line))
+                            lines.Add(line);
 
                         lineIndex = lines.Count;
                         lastLineIndex = lineIndex;

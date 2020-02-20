@@ -39,8 +39,10 @@ namespace EMS
                 return null;
             }
 
+            uint adjustedExpiration = Math.Max(expiration, Config.MIN_MESSAGE_EXPIRATION);
+
             //the hash matches, but is it valid for the provided expiration time?
-            if (expiration < Config.MIN_MESSAGE_EXPIRATION || !PowValidator.Validate(compare, expiration * Config.DIFF_MULTIPLIER))
+            if (!PowValidator.Validate(compare, adjustedExpiration * Config.DIFF_MULTIPLIER))
             {
                 Log.WriteError($"Message failed validation. Invalid expiration time, {compare}");
                 return null;
@@ -56,7 +58,7 @@ namespace EMS
             }
             
             //Make sure expiration is the minimum
-            if (expiration < Config.MIN_MESSAGE_EXPIRATION)
+            if (adjustedExpiration < Config.MIN_MESSAGE_EXPIRATION)
             {
                 Log.WriteError($"Message failed validation. Short life span");
                 return null;

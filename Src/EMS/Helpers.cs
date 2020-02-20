@@ -4,28 +4,24 @@ namespace EMS
 {
     public static class Helpers
     {
-        public static string[] SplitArguments(string commandLine)
+        public static string PopWord(ref string input)
         {
-            var parmChars = commandLine.ToCharArray();
-            var inSingleQuote = false;
-            var inDoubleQuote = false;
-            for (var index = 0; index < parmChars.Length; index++)
+            if (string.IsNullOrEmpty(input))
+                return string.Empty;
+                
+            int index = input.IndexOf(' ');
+            if (index == -1)
             {
-                if (parmChars[index] == '"' && !inSingleQuote)
-                {
-                    inDoubleQuote = !inDoubleQuote;
-                    parmChars[index] = '\n';
-                }
-                if (parmChars[index] == '\'' && !inDoubleQuote)
-                {
-                    inSingleQuote = !inSingleQuote;
-                    parmChars[index] = '\n';
-                }
-                if (!inSingleQuote && !inDoubleQuote && parmChars[index] == ' ')
-                    parmChars[index] = '\n';
+                string ret = input;
+                input = string.Empty;
+                return ret;
             }
-            
-            return (new string(parmChars)).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            else
+            {
+                string ret = input.Substring(0, index);
+                input = input.Remove(0, ret.Length).TrimStart();
+                return ret;
+            }
         }
     }
 }

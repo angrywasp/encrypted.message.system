@@ -4,13 +4,9 @@ namespace EMS.Commands.CLI
 {
     public class NewAddress
     {
-        public static bool Handle(string[] cmd)
+        public static bool Handle(string command)
         {
-            CommandLineParser clp = CommandLineParser.Parse(cmd);
-            string file = null;
-            if (clp.Count >= 2)
-                file = clp[1].Value;
-
+            string file = Helpers.PopWord(ref command);
             KeyRing.Initialize(file);
             return true;
         }

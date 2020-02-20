@@ -29,12 +29,6 @@ namespace EMS
                 return false;
             }
 
-            if (expiration < Config.MIN_MESSAGE_EXPIRATION)
-            {
-                Log.WriteError($"Message expiration is less than the minimum {Config.MIN_MESSAGE_EXPIRATION}");
-                return false;
-            }
-
             byte[] encryptionResult, signature, addressXor;
             ReadProof readProof = ReadProof.Create();
     
@@ -69,7 +63,7 @@ namespace EMS
             // message, which we initialized with 0. We hash each nonce and increment until
             // we find a nonce that passes the difficulty target test
             uint x = MathHelper.Random.GenerateRandomSeed();
-            ulong difficulty = expiration * Config.DIFF_MULTIPLIER;
+            ulong difficulty = Math.Max(expiration, Config.MIN_MESSAGE_EXPIRATION) * Config.DIFF_MULTIPLIER;
             HashKey32 messageHash = HashKey32.Empty;
             Stopwatch sw = new Stopwatch();
             sw.Start();

@@ -1,4 +1,3 @@
-using System;
 using System.Reflection;
 using AngryWasp.Helpers;
 using AngryWasp.Serializer;
@@ -7,18 +6,17 @@ namespace EMS.Commands.CLI
 {
     public class SetConfig
     {
-        public static bool Handle(string[] cmd)
+        public static bool Handle(string command)
         {
-            CommandLineParser clp = CommandLineParser.Parse(cmd);
-            if (clp.Count != 3)
+            string propName = Helpers.PopWord(ref command);
+            string propValue = Helpers.PopWord(ref command);
+
+            if (string.IsNullOrEmpty(propName) || string.IsNullOrEmpty(propValue))
             {
                 Log.WriteError("Incorrect number of arguments");
                 return false;
             }
-
-            string propName = clp[1].Value;
-            string propValue = clp[2].Value;
-
+            
             var props = ReflectionHelper.Instance.GetProperties(typeof(UserConfig), Property_Access_Mode.Read | Property_Access_Mode.Write);
             PropertyInfo pi = null;
 

@@ -25,7 +25,7 @@ namespace EMS
             Serializer.Initialize();
             
             KeyRing.Initialize(cmd["--key-file"] != null ? cmd["--key-file"].Value : null);
-            Config.Initialize(cmd["--config-file"] != null ? cmd["--config-file"].Value : null);
+            Config.Initialize(cmd["--config-file"] != null ? cmd["--config-file"].Value : Config.DEFAULT_CONFIG_FILE);
 
             CommandCode.AddExternalHandler((b) =>
             {
@@ -145,7 +145,7 @@ namespace EMS
 #endregion
 
             Application.RegisterCommand("exit", "Exit the program", Exit.Handle);
-            Application.RegisterCommand("send", "Send a message. Usage: Send <address> \"<message>\"", Commands.CLI.SendMessage.Handle);
+            Application.RegisterCommand("send", "Send a message. Usage: Send <address> <message>", Commands.CLI.SendMessage.Handle);
             Application.RegisterCommand("address", "Prints your messaging address", Commands.CLI.GetAddress.Handle);
             Application.RegisterCommand("new_address", "Discards your current address and creates a new one", Commands.CLI.NewAddress.Handle);
             Application.RegisterCommand("peers", "Print a list of connected peers", Commands.CLI.GetPeers.Handle);
