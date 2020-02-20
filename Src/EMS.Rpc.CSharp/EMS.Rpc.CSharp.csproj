@@ -1,9 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../EMS.targets"/>
+  <Import Project="../../External/AngryWasp.Build/AngryWasp.Build.Common.targets"/>
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
     <OutputType>Library</OutputType>
-    <AssemblyName>EMS.Rpc.CSharp</AssemblyName>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 </Project>

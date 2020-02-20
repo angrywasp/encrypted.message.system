@@ -1,9 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../EMS.targets"/>
+  <Import Project="../../External/AngryWasp.Build/AngryWasp.Build.Common.targets"/>
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <OutputType>Exe</OutputType>
-    <AssemblyName>EMS</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="$(TargetFramework) == 'netcoreapp3.1' and $(Publish) == 'true'">
@@ -13,5 +12,13 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DnsClient" Version="*"/>
+    <PackageReference Include="System.Net.Sockets" Version="*"/>
+    <PackageReference Include="Newtonsoft.Json" Version="*"/>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../External/AngryWasp.Net/Src/AngryWasp.Net/AngryWasp.Net.csproj"/>
+    <ProjectReference Include="../../External/AngryWasp.Cryptography/Src/AngryWasp.Cryptography/AngryWasp.Cryptography.csproj"/>
+    <ProjectReference Include="../../External/AngryWasp.Serializer/Src/AngryWasp.Serializer/AngryWasp.Serializer.csproj"/>
+    <ProjectReference Include="../../External/AngryWasp.Serializer/Src/AngryWasp.Serializer.Serializers/AngryWasp.Serializer.Serializers.csproj"/>
   </ItemGroup>
 </Project>
