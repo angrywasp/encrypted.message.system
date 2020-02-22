@@ -103,7 +103,8 @@ namespace EMS
                 Timestamp = timestamp,
                 Expiration = expiration,
                 Address = address,
-                DecryptedMessage = message
+                DecryptedMessage = message,
+                ReadProof = readProof
             }))
             { 
                 Log.WriteWarning("Could not add message to the encrypted message pool. Message not sent"); 

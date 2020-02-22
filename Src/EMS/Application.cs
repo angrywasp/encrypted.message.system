@@ -87,12 +87,9 @@ namespace EMS
                         }
 
                         lastLineIndex = lineIndex;
-                        int top = Console.CursorTop;
-
-                        Console.CursorLeft = 0;
-                        Console.Write(new string(' ', Console.WindowWidth));
-                        Console.CursorLeft = 0;
-                        Console.CursorTop = top;
+                        Console.Write("\r");
+                        Console.Write(new string(' ', Console.BufferWidth));
+                        Console.Write("\r");
                         Console.Write("> ");
 
                         if (lineIndex < lines.Count)
@@ -118,12 +115,10 @@ namespace EMS
                         }
 
                         lastLineIndex = lineIndex;
-                        int top = Console.CursorTop;
 
-                        Console.CursorLeft = 0;
-                        Console.Write(new string(' ', Console.WindowWidth));
-                        Console.CursorLeft = 0;
-                        Console.CursorTop = top;
+                        Console.Write("\r");
+                        Console.Write(new string(' ', Console.BufferWidth));
+                        Console.Write("\r");
                         Console.Write("> ");
 
                         if (lineIndex < lines.Count)

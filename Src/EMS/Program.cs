@@ -8,6 +8,7 @@ using DnsClient;
 using System.Linq;
 using System.Collections.Generic;
 using AngryWasp.Serializer;
+using System.IO;
 
 namespace EMS
 {
@@ -100,6 +101,7 @@ namespace EMS
                 {
                     Message m;
                     MessagePool.Messages.TryRemove(k, out m);
+                    Log.WriteConsole($"Message {m.Key} expired");
                     if (MessagePool.OutgoingMessages.Contains(k))
                         MessagePool.OutgoingMessages.Remove(k);
                 }

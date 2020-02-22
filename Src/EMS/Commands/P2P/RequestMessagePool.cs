@@ -67,7 +67,9 @@ namespace EMS.Commands.P2P
                         sendPruned = false; // Requesting node does not have this message. Send full
 
                     HashKey16 readProofNonce = HashKey16.Empty;
-                    if (m.Value.ReadProof.IsRead)
+                    if (m.Value.ReadProof == null)
+                        Log.WriteError($"ReadProof is null for message {m.Key}");
+                    else if (m.Value.ReadProof.IsRead)
                         readProofNonce = m.Value.ReadProof.Nonce;
 
                     List<byte> entry = m.Key.ToList().Join(readProofNonce);

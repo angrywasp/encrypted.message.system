@@ -28,14 +28,13 @@
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceRoot}/Bin/Debug/netcoreapp3.1/EMS",
-            "cwd": "${workspaceRoot}/Bin",
-            "console": "externalTerminal",
+            "cwd": "${workspaceRoot}",
+            "console": "integratedTerminal",
             "args":[
                 "--p2p-port", "3501", 
                 "--rpc-port", "4501", 
-                "--key-file", "node1.keys", 
-                "--log-file", "node1.log",
-                "--seed-nodes", "127.0.0.1:3500"]
+                "--key-file", "default.keys", 
+                "--log-file", "app.log"]
         },
         {
             "name": "Node-2",

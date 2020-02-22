@@ -22,6 +22,15 @@ namespace EMS
 
         public HashKey32 ExtractReadProofHash() => Data.Skip(113).Take(32).ToArray();
 
-        public bool IsExpired() => (Timestamp + Expiration) > DateTimeHelper.TimestampNow();
+        public bool IsExpired()
+        {
+            ulong now = DateTimeHelper.TimestampNow();
+            ulong expireTime = Timestamp + Expiration;
+
+            if (now > expireTime)
+                return true;
+            
+            return false;
+        }
     }
 }
