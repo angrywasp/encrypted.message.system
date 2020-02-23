@@ -15,7 +15,14 @@ namespace EMS
         //Give messages a minimum life and enforce it to prevent spamming the network with short lived, low diff messages
         public const uint MIN_MESSAGE_EXPIRATION = 3600;
 
+        public const string DEFAULT_KEY_FILE = "default.keys";
         public const string DEFAULT_CONFIG_FILE = "app.config";
+
+        public const string DEFAULT_LOG_FILE = "app.log";
+
+        public const ushort DEFAULT_P2P_PORT = 3500;
+        public const ushort DEFAULT_RPC_PORT = 4500;
+        public const ushort DEFAULT_RPC_SSL_PORT = 4501;
 
         private static UserConfig user = null;
         private static string userConfigFile = DEFAULT_CONFIG_FILE;
@@ -38,5 +45,15 @@ namespace EMS
     public class UserConfig
     {
         public uint MessageExpiration { get; set; } = Config.MIN_MESSAGE_EXPIRATION;
+
+        public string LogFile { get; set; } = Config.DEFAULT_LOG_FILE;
+
+        public string KeyFile { get; set; } = Config.DEFAULT_KEY_FILE;
+
+        public ushort P2pPort { get; set; } = Config.DEFAULT_P2P_PORT;
+
+        public ushort RpcPort { get; set; } = Config.DEFAULT_RPC_PORT;
+
+        public ushort RpcSslPort { get; set; } = Config.DEFAULT_RPC_SSL_PORT;
     }
 }

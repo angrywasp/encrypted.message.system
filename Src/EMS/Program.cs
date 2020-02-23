@@ -21,13 +21,29 @@ namespace EMS
             bool noReconnect = false;
 
             Console.Title = $"EMS {Version.VERSION}: {Version.CODE_NAME}";
-            
-            Log.Initialize(cmd["--log-file"] != null ? cmd["--log-file"].Value : null);
             Serializer.Initialize();
-            
-            KeyRing.Initialize(cmd["--key-file"] != null ? cmd["--key-file"].Value : null);
             Config.Initialize(cmd["--config-file"] != null ? cmd["--config-file"].Value : Config.DEFAULT_CONFIG_FILE);
 
+            if (cmd["--log-file"] != null)
+                Config.User.LogFile = cmd["--log-file"].Value;
+
+            if (cmd["--key-file"] != null)
+                Config.User.KeyFile = cmd["--key-file"].Value;
+
+            if (cmd["--p2p-port"] != null)
+                Config.User.P2pPort = ushort.Parse(cmd["--p2p-port"].Value);
+
+            if (cmd["--rpc-port"] != null)
+                Config.User.P2pPort = ushort.Parse(cmd["--rpc-port"].Value);
+
+            if (cmd["--rpc-ssl-port"] != null)
+                Config.User.P2pPort = ushort.Parse(cmd["--rpc-ssl-port"].Value);
+
+            Config.Save();
+
+            Log.Initialize();
+            KeyRing.ReadKey();
+            
             CommandCode.AddExternalHandler((b) =>
             {
                 switch (b)
@@ -49,12 +65,6 @@ namespace EMS
             RpcServer.RegisterCommand<object>("get_message_details", GetMessageDetails.Handle);
             RpcServer.RegisterCommand<Commands.RPC.GetMessage.JsonRequest>("get_message", GetMessage.Handle);
             RpcServer.RegisterCommand<Commands.RPC.SendMessage.JsonRequest>("send_message", Commands.RPC.SendMessage.Handle);
-
-            ushort portStart = (ushort)new MersenneTwister(MathHelper.Random.GenerateRandomSeed()).NextUInt(10000, 20000);
-
-            ushort p2pPort = (cmd["--p2p-port"] != null) ? ushort.Parse(cmd["--p2p-port"].Value) : ++portStart;
-            ushort rpcPort = (cmd["--rpc-port"] != null) ? ushort.Parse(cmd["--rpc-port"].Value) : ++portStart;
-            ushort rpcSslPort = (cmd["--rpc-ssl-port"] != null) ? ushort.Parse(cmd["--rpc-ssl-port"].Value) : ++portStart;
 
             if (cmd["--no-reconnect"] != null)
                 noReconnect = true;
@@ -78,8 +88,8 @@ namespace EMS
 
             AddSeedFromDns();
 
-            new Server().Start(p2pPort);
-            new RpcServer().Start(rpcPort, rpcSslPort);
+            new Server().Start(Config.User.P2pPort);
+            new RpcServer().Start(Config.User.RpcPort, Config.User.RpcSslPort);
 
             if (!noReconnect)
                 Client.ConnectToSeedNodes();

@@ -12,13 +12,13 @@ namespace EMS
 
         public static List<Tuple<ConsoleColor, string>> Buffer => bufferWriter.Buffer;
 
-        public static void Initialize(string logFile)
+        public static void Initialize()
         {
-            L.CreateInstance(false, logFile);
+            L.CreateInstance(false, Config.User.LogFile);
 
-            if (!string.IsNullOrEmpty(logFile))
+            if (!string.IsNullOrEmpty(Config.User.LogFile))
             {
-                fileWriter = new FileLogWriter(logFile);
+                fileWriter = new FileLogWriter(Config.User.LogFile);
                 L.Instance.AddWriter("file", fileWriter, false);
             }
             

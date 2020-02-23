@@ -7,7 +7,7 @@ namespace EMS.Commands.CLI
         public static bool Handle(string command)
         {
             string file = Helpers.PopWord(ref command);
-            KeyRing.Initialize(file);
+            KeyRing.NewKey();
             return true;
         }
     }

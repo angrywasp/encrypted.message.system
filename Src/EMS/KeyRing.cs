@@ -4,6 +4,7 @@ using AngryWasp.Cryptography;
 using AngryWasp.Helpers;
 using System.Linq;
 using System.Text;
+using System;
 
 namespace EMS
 {
@@ -15,25 +16,28 @@ namespace EMS
         public static byte[] PrivateKey => privateKey;
         public static byte[] PublicKey => publicKey;
 
-        public static void Initialize(string path)
+        public static void ReadKey()
         {
-            if (string.IsNullOrEmpty(path))
-                Ecc.GenerateKeyPair(out publicKey, out privateKey);
+            if (!File.Exists(Config.User.KeyFile))
+                NewKey();
             else
             {
-                if (File.Exists(path))
-                {
-                    privateKey = File.ReadAllBytes(path);
-                    publicKey = Ecc.GetPublicKeyFromPrivateKey(privateKey);
-                }
-                else
-                {
-                    Ecc.GenerateKeyPair(out publicKey, out privateKey);
-                    File.WriteAllBytes(path, privateKey);
-                }
+                privateKey = File.ReadAllBytes(Config.User.KeyFile);
+                publicKey = Ecc.GetPublicKeyFromPrivateKey(privateKey);
             }
+        }
 
+        public static void NewKey()
+        {
+            //Create a new address
+            Ecc.GenerateKeyPair(out publicKey, out privateKey);
             Log.WriteConsole($"Address - {Base58.Encode(publicKey)}");
+
+            //Save to the key file path
+            if (string.IsNullOrEmpty(Config.User.KeyFile))
+                return;
+
+            File.WriteAllBytes(Config.User.KeyFile, privateKey);
         }
 
         public static byte[] CreateSharedKey(byte[] recipientPublicKey) => Ecc.CreateKeyAgreement(privateKey, recipientPublicKey);
