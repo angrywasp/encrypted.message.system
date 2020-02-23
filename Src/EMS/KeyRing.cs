@@ -24,6 +24,7 @@ namespace EMS
             {
                 privateKey = File.ReadAllBytes(Config.User.KeyFile);
                 publicKey = Ecc.GetPublicKeyFromPrivateKey(privateKey);
+                Log.WriteConsole($"Address - {Base58.Encode(publicKey)}");
             }
         }
 
