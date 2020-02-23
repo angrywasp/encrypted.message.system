@@ -136,8 +136,21 @@ namespace EMS
                     {
                         if (enteredText.Count > 0)
                         {
-                            enteredText.RemoveAt(enteredText.Count - 1);
-                            Console.Write("\b \b");
+                            if (Console.CursorLeft == 0)
+                            {
+                                Console.CursorTop -= 1;
+                                Console.CursorLeft = Console.BufferWidth - 1;
+                                enteredText.RemoveAt(enteredText.Count - 1);
+                                Console.Write(" ");
+                                Console.CursorLeft = Console.BufferWidth - 1;
+                                Console.CursorTop -= 1;
+                            }
+                            else
+                            {
+                                enteredText.RemoveAt(enteredText.Count - 1);
+                                Console.Write("\b \b");
+                            }
+
                         }
 
                         noPrompt = true;
@@ -170,6 +183,11 @@ namespace EMS
                         enteredText.Add(key.KeyChar);
                         noPrompt = true;
                     }
+                    // Ignore the following keys
+                    // TODO: Implement handling of these keys
+                    else if (key.Key == ConsoleKey.LeftArrow ||
+                             key.Key == ConsoleKey.RightArrow)
+                        noPrompt = true;
                 }
             }));
 
