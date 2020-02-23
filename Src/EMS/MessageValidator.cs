@@ -51,9 +51,11 @@ namespace EMS
             //FTL check, but only if we are verifying a message received through the ShareMessage p2p command
             //If we are receiving this via RequestMessagePool, we must skip this verification as we are pulling old
             //Messages and this check will in most cases fail
-            if (verifyFtl && ((uint)Math.Abs(timestamp - (uint)DateTimeHelper.TimestampNow()) > Config.FTL))
+            uint localTimestamp = (uint)DateTimeHelper.TimestampNow();
+            if (verifyFtl && ((uint)Math.Abs(timestamp - localTimestamp) > Config.FTL))
             {
-                Log.WriteError($"Message failed validation. Outside future time limit");
+                Log.WriteError($"Message failed validation. Outside future time limit. Message timestamp");
+                Log.WriteError($"Message timestamp is {timestamp}, local timestamp is {localTimestamp}");
                 return null;
             }
             
@@ -71,6 +73,7 @@ namespace EMS
                 Data = input,
                 Timestamp = timestamp,
                 Expiration = expiration,
+                ReadProof = new ReadProof()
             };
 
             try
