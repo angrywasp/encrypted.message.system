@@ -34,10 +34,10 @@ namespace EMS
                 Config.User.P2pPort = ushort.Parse(cmd["--p2p-port"].Value);
 
             if (cmd["--rpc-port"] != null)
-                Config.User.P2pPort = ushort.Parse(cmd["--rpc-port"].Value);
+                Config.User.RpcPort = ushort.Parse(cmd["--rpc-port"].Value);
 
             if (cmd["--rpc-ssl-port"] != null)
-                Config.User.P2pPort = ushort.Parse(cmd["--rpc-ssl-port"].Value);
+                Config.User.RpcSslPort = ushort.Parse(cmd["--rpc-ssl-port"].Value);
 
             Config.Save();
 
