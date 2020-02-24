@@ -52,9 +52,10 @@ namespace EMS
             //If we are receiving this via RequestMessagePool, we must skip this verification as we are pulling old
             //Messages and this check will in most cases fail
             uint localTimestamp = (uint)DateTimeHelper.TimestampNow;
-            if (verifyFtl && ((uint)Math.Abs(timestamp - localTimestamp) > Config.FTL))
+            uint variance = (uint)Math.Abs(timestamp - localTimestamp);
+            if (verifyFtl && variance > Config.FTL)
             {
-                Log.WriteError($"Message failed validation. Outside future time limit. Message timestamp");
+                Log.WriteError($"Message failed validation. Outside future time limit. {variance} > {Config.FTL}");
                 Log.WriteError($"Message timestamp is {timestamp}, local timestamp is {localTimestamp}");
                 return null;
             }
