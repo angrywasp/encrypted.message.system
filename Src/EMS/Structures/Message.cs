@@ -13,7 +13,7 @@ namespace EMS
         public string Address { get; set; } =  string.Empty;
         public string DecryptedMessage { get; set; } =  string.Empty;
 
-        public ReadProof ReadProof { get; set; } = null;
+        public ReadProof ReadProof { get; set; } = new ReadProof();
         
         public bool IsDecrypted
         {

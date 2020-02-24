@@ -72,8 +72,7 @@ namespace EMS
                 Hash = messageHash,
                 Data = input,
                 Timestamp = timestamp,
-                Expiration = expiration,
-                ReadProof = new ReadProof()
+                Expiration = expiration
             };
 
             try
