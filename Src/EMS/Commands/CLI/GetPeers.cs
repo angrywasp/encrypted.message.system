@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AngryWasp.Net;
 
 namespace EMS.Commands.CLI
@@ -42,11 +43,20 @@ namespace EMS.Commands.CLI
             Console.ForegroundColor = ConsoleColor.Green;
 
             count = 0;
+            List<Connection> disconnected = new List<Connection>();
             ConnectionManager.ForEach(Direction.Outgoing, (c) =>
             {
-                Console.WriteLine($"{c.PeerId} - {c.Address.MapToIPv4()}:{c.Port}");
-                ++count;
+                try {
+                    Console.WriteLine($"{c.PeerId} - {c.Address.MapToIPv4()}:{c.Port}");
+                    ++count;
+                } catch {
+                    disconnected.Add(c);
+                }
+                
             });
+
+            foreach (var d in disconnected)
+                ConnectionManager.Remove(d);
 
             if (count == 0)
             {
