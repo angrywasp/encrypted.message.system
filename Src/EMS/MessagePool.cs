@@ -18,6 +18,8 @@ namespace EMS
         public static ConcurrentDictionary<HashKey16, Message> Messages => messages;
         public static HashSet<HashKey16> OutgoingMessages => outgoingMessages;
 
+        public static Message LastReceivedMessage { get; set; } = null;
+
         public static bool Send(string address, string message, uint expiration, out HashKey16 messageKey)
         {
             messageKey = HashKey16.Empty;

@@ -27,7 +27,10 @@ namespace EMS.Commands.P2P
             if (MessagePool.Messages.TryAdd(msg.Key, msg))
             {
                 if (msg.IsDecrypted)
+                {
                     Log.WriteConsole($"Received a message with key {msg.Key}");
+                    MessagePool.LastReceivedMessage = msg;
+                }
             }
             else
                 //already have it. skip. cause we already would have shared this the first time we got it

@@ -9,7 +9,10 @@ namespace EMS.Commands.CLI
         {
             string hex = Helpers.PopWord(ref command);
 
-            if (string.IsNullOrEmpty(hex) || hex.Length != 32)
+            if (string.IsNullOrEmpty(hex))
+                hex = MessagePool.LastReceivedMessage != null ? MessagePool.LastReceivedMessage.Key.ToString() : null;
+
+            if (string.IsNullOrEmpty(hex))
             {
                 Log.WriteError("Incorrect number of arguments");
                 return false;
