@@ -33,7 +33,7 @@ namespace EMS
 
         public static void Start()
         {
-            bool noPrompt = false;
+            bool noPrompt = true;
             List<char> enteredText = new List<char>();
 
             Thread t0 = new Thread(new ThreadStart( () =>

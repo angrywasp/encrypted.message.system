@@ -44,6 +44,10 @@ namespace EMS
             Log.Initialize();
             Log.WriteConsole($"EMS {Version.VERSION}: {Version.CODE_NAME}");
             KeyRing.ReadKey();
+            Console.Clear();
+            if (Environment.GetEnvironmentVariable("TERM").StartsWith("xterm")) 
+                Console.WriteLine("\x1b[3J");
+            Console.CursorTop = 0;
             
             CommandCode.AddExternalHandler((b) =>
             {
