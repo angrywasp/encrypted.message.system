@@ -17,7 +17,9 @@
             "cwd": "${workspaceRoot}",
             "console": "externalTerminal",
             "args":[
-                "--no-reconnect"]
+                "--config-file", "${workspaceRoot}/../../../.ems/app.config",
+                "--no-reconnect"
+            ]
         },
         {
             "name": "Node-1",

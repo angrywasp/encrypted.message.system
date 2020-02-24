@@ -42,6 +42,7 @@ namespace EMS
             Config.Save();
 
             Log.Initialize();
+            Log.WriteConsole($"EMS {Version.VERSION}: {Version.CODE_NAME}");
             KeyRing.ReadKey();
             
             CommandCode.AddExternalHandler((b) =>
@@ -157,7 +158,7 @@ namespace EMS
 #endregion
 
             Application.RegisterCommand("exit", "Exit the program", Exit.Handle);
-            Application.RegisterCommand("send", "Send a message. Usage: Send <address> <message>", Commands.CLI.SendMessage.Handle);
+            Application.RegisterCommand("send", "Send a message. Usage: send <address> <message>", Commands.CLI.SendMessage.Handle);
             Application.RegisterCommand("address", "Prints your messaging address", Commands.CLI.GetAddress.Handle);
             Application.RegisterCommand("new_address", "Discards your current address and creates a new one", Commands.CLI.NewAddress.Handle);
             Application.RegisterCommand("peers", "Print a list of connected peers", Commands.CLI.GetPeers.Handle);
@@ -166,6 +167,7 @@ namespace EMS
             Application.RegisterCommand("flag", "Mark a message as read. Usage: flag <message_hash>", Commands.CLI.MarkMessageRead.Handle);
             Application.RegisterCommand("get", "Get a config option value. Usage: get <param>", Commands.CLI.GetConfig.Handle);
             Application.RegisterCommand("set", "Set a config option value. Usage: set <param> <value>", Commands.CLI.SetConfig.Handle);
+            Application.RegisterCommand("clear", "Clear the console", Commands.CLI.Clear.Handle);
 
             Application.RegisterCommand("sync", "Manually sync new messages from your connected peers", (c) =>
             {
