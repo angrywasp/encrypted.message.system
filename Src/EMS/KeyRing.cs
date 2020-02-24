@@ -4,6 +4,7 @@ using AngryWasp.Cryptography;
 using AngryWasp.Helpers;
 using System.Linq;
 using System.Text;
+using System;
 
 namespace EMS
 {
@@ -21,7 +22,20 @@ namespace EMS
                 NewKey();
             else
             {
-                privateKey = File.ReadAllBytes(Config.User.KeyFile);
+                byte[] encryptedKeyData = File.ReadAllBytes(Config.User.KeyFile);
+                string a = PasswordPrompt.Get("Enter your key file password");
+                byte[] password = password = string.IsNullOrEmpty(a) ? Keccak.Hash128(HashKey16.Empty) : Keccak.Hash128(Encoding.ASCII.GetBytes(a));;
+                
+                try
+                {
+                    privateKey = Aes.Decrypt(encryptedKeyData, password);
+                }
+                catch
+                {
+                    Application.TriggerExit("Key file password was incorrect. Aborting!");
+                    return;
+                }
+                
                 publicKey = Ecc.GetPublicKeyFromPrivateKey(privateKey);
                 Log.WriteConsole($"Address - {Base58.Encode(publicKey)}");
             }
@@ -29,6 +43,7 @@ namespace EMS
 
         public static void NewKey()
         {
+            Application.PauseBufferedLog(true);
             //Create a new address
             Ecc.GenerateKeyPair(out publicKey, out privateKey);
             Log.WriteConsole($"Address - {Base58.Encode(publicKey)}");
@@ -37,7 +52,28 @@ namespace EMS
             if (string.IsNullOrEmpty(Config.User.KeyFile))
                 return;
 
-            File.WriteAllBytes(Config.User.KeyFile, privateKey);
+            byte[] password = null;
+            while (true)
+            {
+                string a = PasswordPrompt.Get("Enter a password for your key file");
+                string b = PasswordPrompt.Get("Confirm your password");
+
+                if (a != b)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Password do not match. Please try again");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    continue;
+                }
+
+                password = string.IsNullOrEmpty(a) ? Keccak.Hash128(HashKey16.Empty) : Keccak.Hash128(Encoding.ASCII.GetBytes(a));
+                break;
+            }
+
+            byte[] encryptedKeyData = Aes.Encrypt(privateKey, password);
+
+            File.WriteAllBytes(Config.User.KeyFile, encryptedKeyData);
+            Application.PauseBufferedLog(false);
         }
 
         public static byte[] CreateSharedKey(byte[] recipientPublicKey) => Ecc.CreateKeyAgreement(privateKey, recipientPublicKey);

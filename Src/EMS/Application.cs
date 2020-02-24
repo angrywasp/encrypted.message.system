@@ -7,6 +7,18 @@ namespace EMS
 {
     public static class Application
     {
+        private static bool exitTriggered = false;
+        private static string exitMessage = null;
+        public static void TriggerExit(string message)
+        {
+            exitTriggered = true;
+            exitMessage = message;
+        }
+
+        private static bool logBufferPaused = false;
+
+        public static void PauseBufferedLog(bool pause) => logBufferPaused = pause;
+
         public delegate bool CliFunc<T>(T arg);
 
         private static Dictionary<string, Tuple<string, CliFunc<string>>> commands = new Dictionary<string, Tuple<string, CliFunc<string>>>();
@@ -28,7 +40,22 @@ namespace EMS
             {
                 while(true)
                 {
-                    if (Log.Buffer.Count == 0)
+                    if (exitTriggered)
+                    {
+                        if (Console.CursorLeft != 0)
+                        {
+                            Console.Write("\r");
+                            Console.Write(new string(' ', Console.BufferWidth));
+                            Console.Write("\r");
+
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine(exitMessage);
+                            Console.ForegroundColor = ConsoleColor.White;
+                            break;
+                        }
+                    }
+
+                    if (Log.Buffer.Count == 0 || logBufferPaused)
                     {
                         Thread.Sleep(50);
                         continue;
@@ -38,7 +65,9 @@ namespace EMS
                     var logMessages = Log.Buffer.ToArray();
                     Log.Buffer.Clear();
 
-                    if (Console.CursorLeft != 0)
+                    int left = Console.CursorLeft;
+
+                    if (left != 0)
                     {
                         Console.Write("\r");
                         Console.Write(new string(' ', Console.BufferWidth));
@@ -64,6 +93,9 @@ namespace EMS
                 
                 while (true)
                 {
+                    if (exitTriggered)
+                        break;
+
                     if (!noPrompt)
                         Console.Write("> ");
 
@@ -188,6 +220,9 @@ namespace EMS
                     else if (key.Key == ConsoleKey.LeftArrow ||
                              key.Key == ConsoleKey.RightArrow)
                         noPrompt = true;
+
+                    if (exitTriggered)
+                        break;
                 }
             }));
 
