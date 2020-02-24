@@ -168,6 +168,7 @@ namespace EMS
             Application.RegisterCommand("get", "Get a config option value. Usage: get <param>", Commands.CLI.GetConfig.Handle);
             Application.RegisterCommand("set", "Set a config option value. Usage: set <param> <value>", Commands.CLI.SetConfig.Handle);
             Application.RegisterCommand("clear", "Clear the console", Commands.CLI.Clear.Handle);
+            Application.RegisterCommand("time", "Display the current UTC time", Commands.CLI.Time.Handle);
 
             Application.RegisterCommand("sync", "Manually sync new messages from your connected peers", (c) =>
             {
