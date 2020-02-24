@@ -8,6 +8,8 @@ namespace EMS.Commands.CLI
     {
         public static bool Handle(string command)
         {
+
+            List<Connection> disconnected = new List<Connection>();
             
 #region Incoming
 
@@ -20,8 +22,12 @@ namespace EMS.Commands.CLI
             int count = 0;
             ConnectionManager.ForEach(Direction.Incoming, (c) =>
             {
-                Console.WriteLine($"{c.PeerId} - {c.Address.MapToIPv4()}:{c.Port}");
-                ++count;
+                try {
+                    Console.WriteLine($"{c.PeerId} - {c.Address.MapToIPv4()}:{c.Port}");
+                    ++count;
+                } catch {
+                    disconnected.Add(c);
+                }
             });
 
             if (count == 0)
@@ -43,7 +49,7 @@ namespace EMS.Commands.CLI
             Console.ForegroundColor = ConsoleColor.Green;
 
             count = 0;
-            List<Connection> disconnected = new List<Connection>();
+            
             ConnectionManager.ForEach(Direction.Outgoing, (c) =>
             {
                 try {
@@ -55,8 +61,6 @@ namespace EMS.Commands.CLI
                 
             });
 
-            foreach (var d in disconnected)
-                ConnectionManager.Remove(d);
 
             if (count == 0)
             {
@@ -68,6 +72,9 @@ namespace EMS.Commands.CLI
 
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
+
+            foreach (var d in disconnected)
+                ConnectionManager.Remove(d);
 
             return true;
         }
