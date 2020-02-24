@@ -14,13 +14,9 @@
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceRoot}/Bin/Debug/netcoreapp3.1/EMS",
-            "cwd": "${workspaceRoot}/Bin",
+            "cwd": "${workspaceRoot}",
             "console": "externalTerminal",
             "args":[
-                "--p2p-port", "3500", 
-                "--rpc-port", "4500",
-                "--key-file", "seed.keys", 
-                "--log-file", "seed.log",
                 "--no-reconnect"]
         },
         {

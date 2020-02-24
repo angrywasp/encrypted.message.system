@@ -24,10 +24,9 @@ namespace EMS
 
         public bool IsExpired()
         {
-            ulong now = DateTimeHelper.TimestampNow();
             ulong expireTime = Timestamp + Expiration;
 
-            if (now > expireTime)
+            if (DateTimeHelper.TimestampNow > expireTime)
                 return true;
             
             return false;

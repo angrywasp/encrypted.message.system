@@ -7,6 +7,8 @@
     <AssemblyName>ems</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="AngryWasp.Helpers" Version="*"/>
+    <PackageReference Include="AngryWasp.Logger" Version="*"/>
     <PackageReference Include="DnsClient" Version="*"/>
     <PackageReference Include="System.Net.Sockets" Version="*"/>
     <PackageReference Include="Newtonsoft.Json" Version="*"/>

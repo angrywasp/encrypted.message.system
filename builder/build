@@ -21,6 +21,7 @@ function clean_build_artifacts()
 function clean()
 {
     cd ${ROOT_DIR}
+    dotnet clean
     clean_build_artifacts
 }
 
