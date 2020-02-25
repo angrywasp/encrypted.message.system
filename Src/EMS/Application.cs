@@ -195,6 +195,8 @@ namespace EMS
                         Console.WriteLine();
                         
                         string cmd = Helpers.PopWord(ref commandString);
+                        
+                        Application.PauseBufferedLog(true);
 
                         if (commands.ContainsKey(cmd))
                         {
@@ -203,6 +205,8 @@ namespace EMS
                         }
                         else
                             Log.WriteError("Unknown command");
+
+                        Application.PauseBufferedLog(false);
                         
                         if (!string.IsNullOrEmpty(line))
                             lines.Add(line);
