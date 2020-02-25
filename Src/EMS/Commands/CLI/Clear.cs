@@ -2,9 +2,10 @@ using System;
 
 namespace EMS.Commands.CLI
 {
-    public class Clear
+    [ApplicationCommand("clear", "Clears the console")]
+    public class Clear : IApplicationCommand
     {
-        public static bool Handle(string command)
+        public bool Handle(string command)
         {
             Console.Clear();
             if (Environment.GetEnvironmentVariable("TERM").StartsWith("xterm")) 

@@ -1,10 +1,33 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using AngryWasp.Helpers;
 
 namespace EMS
 {
+    public class ApplicationCommandAttribute : Attribute
+    {
+        private string helpText = string.Empty;
+        private string key = string.Empty;
+
+        public string HelpText => helpText;
+
+        public string Key => key;
+
+        public ApplicationCommandAttribute(string key, string helpText)
+        {
+            this.key = key;
+            this.helpText = helpText;
+        }
+    }
+
+    public interface IApplicationCommand
+    {
+        bool Handle(string command);
+    }
+
     public static class Application
     {
         private static bool exitTriggered = false;
@@ -24,6 +47,20 @@ namespace EMS
         private static Dictionary<string, Tuple<string, CliFunc<string>>> commands = new Dictionary<string, Tuple<string, CliFunc<string>>>();
 
         public static Dictionary<string, Tuple<string, CliFunc<string>>> Commands => commands;
+
+        public static void RegisterCommands()
+        {
+            var types = ReflectionHelper.Instance.GetTypesInheritingOrImplementing(Assembly.GetExecutingAssembly(), typeof(IApplicationCommand))
+                .Where(m => m.GetCustomAttributes(typeof(ApplicationCommandAttribute), false).Length > 0)
+                .ToArray();
+
+            foreach (var type in types)
+            {
+                IApplicationCommand ia = (IApplicationCommand)Activator.CreateInstance(type);
+                ApplicationCommandAttribute a = ia.GetType().GetCustomAttributes(true).OfType<ApplicationCommandAttribute>().FirstOrDefault();
+                RegisterCommand(a.Key, a.HelpText, ia.Handle);
+            }
+        }
 
         public static void RegisterCommand(string key, string helpText, CliFunc<string> handler)
         {
@@ -195,7 +232,7 @@ namespace EMS
                         Console.WriteLine();
                         
                         string cmd = Helpers.PopWord(ref commandString);
-                        
+
                         Application.PauseBufferedLog(true);
 
                         if (commands.ContainsKey(cmd))
@@ -229,7 +266,6 @@ namespace EMS
                         break;
                 }
             }));
-
 
             t0.Start();
             t1.Start();

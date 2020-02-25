@@ -24,7 +24,7 @@ namespace EMS
             {
                 byte[] encryptedKeyData = File.ReadAllBytes(Config.User.KeyFile);
                 string a = PasswordPrompt.Get("Enter your key file password");
-                byte[] password = password = string.IsNullOrEmpty(a) ? Keccak.Hash128(HashKey16.Empty) : Keccak.Hash128(Encoding.ASCII.GetBytes(a));;
+                byte[] password = string.IsNullOrEmpty(a) ? Keccak.Hash128(HashKey16.Empty) : Keccak.Hash128(Encoding.ASCII.GetBytes(a));;
                 
                 try
                 {

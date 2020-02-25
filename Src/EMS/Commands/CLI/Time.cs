@@ -3,9 +3,10 @@ using AngryWasp.Helpers;
 
 namespace EMS.Commands.CLI
 {
-    public class Time
+    [ApplicationCommand("time", "Display the current UTC time")]
+    public class Time : IApplicationCommand
     {
-        public static bool Handle(string command)
+        public bool Handle(string command)
         {
             Log.WriteConsole($"Current UTC time: {DateTime.UtcNow} ({DateTimeHelper.TimestampNow})");
             return true;

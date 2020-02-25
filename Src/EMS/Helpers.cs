@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using DnsClient;
 
 namespace EMS
 {
@@ -21,6 +23,29 @@ namespace EMS
                 string ret = input.Substring(0, index);
                 input = input.Remove(0, ret.Length).TrimStart();
                 return ret;
+            }
+        }
+
+        public static void AddSeedFromDns()
+        {
+            var client = new LookupClient();
+            var records = client.Query("seed.angrywasp.net.au", QueryType.TXT).Answers;
+                
+            foreach (var r in records)
+            {
+                string txt = ((DnsClient.Protocol.TxtRecord)r).Text.ToArray()[0];
+
+                string[] node = txt.Split(':', StringSplitOptions.RemoveEmptyEntries);
+                string host = node[0];
+                ushort port = AngryWasp.Net.Config.DEFAULT_PORT;
+                if (node.Length > 1)
+                    ushort.TryParse(node[1], out port);
+
+                if (AngryWasp.Net.Config.HasSeedNode(host, port))
+                    continue;
+
+                AngryWasp.Net.Config.AddSeedNode(host, port);
+                Log.WriteConsole($"Added seed node {host}:{port}");
             }
         }
     }

@@ -3,9 +3,10 @@ using AngryWasp.Helpers;
 
 namespace EMS.Commands.CLI
 {
-    public class LastMessage
+    [ApplicationCommand("last", "Display the last received message")]
+    public class LastMessage : IApplicationCommand
     {
-        public static bool Handle(string command)
+        public bool Handle(string command)
         {
             Message message = MessagePool.LastReceivedMessage;
 

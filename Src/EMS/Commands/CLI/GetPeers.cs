@@ -4,9 +4,10 @@ using AngryWasp.Net;
 
 namespace EMS.Commands.CLI
 {
-    public class GetPeers
+    [ApplicationCommand("peers", "Print a list of connected peers")]
+    public class GetPeers : IApplicationCommand
     {
-        public static bool Handle(string command)
+        public bool Handle(string command)
         {
 
             List<Connection> disconnected = new List<Connection>();

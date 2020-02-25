@@ -6,9 +6,10 @@ using AngryWasp.Helpers;
 
 namespace EMS.Commands.CLI
 {
-    public class NewPassword
+    [ApplicationCommand("new_password", "Change the password for the loaded key file")]
+    public class NewPassword : IApplicationCommand
     {
-        public static bool Handle(string command)
+        public bool Handle(string command)
         {
             byte[] encryptedKeyData = File.ReadAllBytes(Config.User.KeyFile);
             string a = PasswordPrompt.Get("Enter your key file password");

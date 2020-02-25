@@ -15,7 +15,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/Bin/Debug/netcoreapp3.1/EMS",
             "cwd": "${workspaceRoot}",
-            "console": "externalTerminal",
+            "console": "integratedTerminal",
             "args":[
                 "--config-file", "${workspaceRoot}/../../../.ems/app.config",
                 "--no-reconnect"
@@ -40,7 +40,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/Bin/Debug/netcoreapp3.1/EMS",
             "cwd": "${workspaceRoot}/Bin",
-            "console": "externalTerminal",
+            "console": "integratedTerminal",
             "args":[
                 "--p2p-port", "3502",
                 "--rpc-port", "4502", 
@@ -54,7 +54,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/Bin/Debug/netcoreapp3.1/EMS",
             "cwd": "${workspaceRoot}/Bin",
-            "console": "externalTerminal",
+            "console": "integratedTerminal",
             "args":[
                 "--p2p-port", "3503", 
                 "--rpc-port", "4503", 

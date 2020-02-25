@@ -2,9 +2,10 @@ using AngryWasp.Helpers;
 
 namespace EMS.Commands.CLI
 {
-    public class MarkMessageRead
+    [ApplicationCommand("flag", "Mark a message as read. Usage: flag <message_hash>")]
+    public class MarkMessageRead : IApplicationCommand
     {
-        public static bool Handle(string command)
+        public bool Handle(string command)
         {
             string hex = Helpers.PopWord(ref command);
 

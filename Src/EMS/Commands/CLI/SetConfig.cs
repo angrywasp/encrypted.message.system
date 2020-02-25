@@ -4,9 +4,10 @@ using AngryWasp.Serializer;
 
 namespace EMS.Commands.CLI
 {
-    public class SetConfig
+    [ApplicationCommand("set", "Set a config option value. Usage: set <param> <value>")]
+    public class SetConfig : IApplicationCommand
     {
-        public static bool Handle(string command)
+        public bool Handle(string command)
         {
             string propName = Helpers.PopWord(ref command);
             string propValue = Helpers.PopWord(ref command);

@@ -2,9 +2,10 @@ using System;
 
 namespace EMS.Commands.CLI
 {
-    public class Exit
+    [ApplicationCommand("exit", "Exit the program")]
+    public class Exit : IApplicationCommand
     {
-        public static bool Handle(string command)
+        public bool Handle(string command)
         {
             Environment.Exit(0);
             return true;

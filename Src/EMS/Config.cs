@@ -55,5 +55,7 @@ namespace EMS
         public ushort RpcPort { get; set; } = Config.DEFAULT_RPC_PORT;
 
         public ushort RpcSslPort { get; set; } = Config.DEFAULT_RPC_SSL_PORT;
+
+        public bool NoReconnect { get; set; } = false;
     }
 }

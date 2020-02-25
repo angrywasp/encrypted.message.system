@@ -5,9 +5,10 @@ using System.Linq;
 
 namespace EMS.Commands.CLI
 {
-    public class GetMessages
+    [ApplicationCommand("messages", "Print the message pool")]
+    public class GetMessages : IApplicationCommand
     {
-        public static bool Handle(string command)
+        public bool Handle(string command)
         {
             List<Message> encrypted = new List<Message>();
             List<Message> incoming = new List<Message>();

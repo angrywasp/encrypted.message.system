@@ -2,9 +2,10 @@ using AngryWasp.Helpers;
 
 namespace EMS.Commands.CLI
 {
-    public class NewAddress
+    [ApplicationCommand("new_address", "Discards your current address and creates a new one")]
+    public class NewAddress : IApplicationCommand
     {
-        public static bool Handle(string command)
+        public bool Handle(string command)
         {
             string file = Helpers.PopWord(ref command);
             KeyRing.NewKey();

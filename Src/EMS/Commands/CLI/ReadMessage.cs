@@ -3,9 +3,10 @@ using AngryWasp.Helpers;
 
 namespace EMS.Commands.CLI
 {
-    public class ReadMessage
+    public class ReadMessage : IApplicationCommand
     {
-        public static bool Handle(string command)
+        [ApplicationCommand("read", "Read a message. Usage: read <message_hash>")]
+        public bool Handle(string command)
         {
             string hex = Helpers.PopWord(ref command);
 

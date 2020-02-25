@@ -1,11 +1,10 @@
-using System.Text;
-using AngryWasp.Helpers;
 
 namespace EMS.Commands.CLI
 {
-    public class SendMessage
+    public class SendMessage : IApplicationCommand
     {
-        public static bool Handle(string command)
+        [ApplicationCommand("send", "Send a message. Usage: send <address> <message>")]
+        public bool Handle(string command)
         {
             string address = Helpers.PopWord(ref command);
 
