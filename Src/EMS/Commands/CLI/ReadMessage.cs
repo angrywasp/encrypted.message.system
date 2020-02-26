@@ -47,12 +47,10 @@ namespace EMS.Commands.CLI
                 return false;
             }
 
-            string direction = "  From:";
-            if (MessagePool.OutgoingMessages.Contains(key))
-                direction = "    To:";
+            string dir = message.Direction.ToString().PadLeft(6);
 
             Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine($"{direction} {message.Address}");
+            Console.WriteLine($"{dir}: {message.Address}");
             Console.WriteLine($"  Time: {DateTimeHelper.UnixTimestampToDateTime(message.Timestamp)}");
             Console.WriteLine($"  Type: {message.MessageType} (Version {message.MessageVersion})");
             Console.WriteLine($"Expiry: {DateTimeHelper.UnixTimestampToDateTime(message.Timestamp + message.Expiration)}");

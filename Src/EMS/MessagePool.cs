@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using System.Text;
 using AngryWasp.Helpers;
-using AngryWasp.Net;
 using EMS.Commands.P2P;
 using System.Linq;
 using System.Collections.Concurrent;
@@ -13,10 +11,7 @@ namespace EMS
     public static class MessagePool
     {
         private static ConcurrentDictionary<HashKey16, Message> messages = new ConcurrentDictionary<HashKey16, Message>();
-        private static HashSet<HashKey16> outgoingMessages = new HashSet<HashKey16>();
-
         public static ConcurrentDictionary<HashKey16, Message> Messages => messages;
-        public static HashSet<HashKey16> OutgoingMessages => outgoingMessages;
 
         public static Message LastReceivedMessage { get; set; } = null;
 
@@ -112,15 +107,13 @@ namespace EMS
                 MessageType = messageType,
                 Address = address,
                 DecryptedData = message,
+                Direction = Message_Direction.Out,
                 ReadProof = readProof
             }))
             { 
                 Log.WriteWarning("Could not add message to the encrypted message pool. Message not sent"); 
                 return false;
             }
-
-            //cross reference to the message pool for messages we have sent
-            outgoingMessages.Add(messageKey);
 
             Helpers.MessageAll(ShareMessage.GenerateRequest(true, finalMessage).ToArray());
 

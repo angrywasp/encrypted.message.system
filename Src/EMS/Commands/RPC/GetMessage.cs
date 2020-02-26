@@ -29,7 +29,7 @@ namespace EMS.Commands.RPC
             ret.Response.MessageVersion = message.MessageVersion;
             ret.Response.MessageType = message.MessageType;  
 
-            ret.Response.Direction = message.IsDecrypted ? (MessagePool.OutgoingMessages.Contains(message.Key) ? "out": "in") : string.Empty;
+            ret.Response.Direction = message.Direction.ToString().ToLower();
 
             if (message.ReadProof != null)
                 ret.Response.ReadProof = message.ReadProof;

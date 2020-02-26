@@ -18,7 +18,7 @@ namespace EMS.Commands.CLI
             {
                 if (m.Value.IsDecrypted)
                 {
-                    if (MessagePool.OutgoingMessages.Contains(m.Key))
+                    if (m.Value.Direction == Message_Direction.Out)
                         outgoing.Add(m.Value);
                     else
                         incoming.Add(m.Value);
@@ -85,11 +85,8 @@ namespace EMS.Commands.CLI
 
                 if (m.IsDecrypted)
                 {
-                    bool incoming = true;
-                    if (MessagePool.OutgoingMessages.Contains(m.Key))
-                        incoming = false;
-
-                    Console.WriteLine($"{(incoming ? "  From:" : "    To:")} {m.Address}");
+                    string direction = m.Direction.ToString().PadLeft(6);
+                    Console.WriteLine($"{direction}: {m.Address}");
                 }
 
                 Console.WriteLine();

@@ -13,7 +13,6 @@ namespace EMS.Commands.RPC
             foreach (var m in MessagePool.Messages)
             {
                 bool isRead = m.Value.ReadProof != null && m.Value.ReadProof.IsRead;
-                string direction = m.Value.IsDecrypted ? (MessagePool.OutgoingMessages.Contains(m.Key) ? "out": "in") : string.Empty;
 
                 ret.Response.Details.Add(new MessageDetail
                 {
@@ -22,7 +21,7 @@ namespace EMS.Commands.RPC
                     Expiration = m.Value.Expiration,
                     Address = m.Value.Address,
                     Read = isRead,
-                    Direction = direction,
+                    Direction = m.Value.Direction.ToString().ToLower(),
                     MessageVersion = m.Value.MessageVersion,
                     MessageType = m.Value.MessageType                
                 });
