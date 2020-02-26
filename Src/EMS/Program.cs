@@ -3,12 +3,8 @@ using System;
 using AngryWasp.Net;
 using EMS.Commands.P2P;
 using EMS.Commands.RPC;
-using EMS.Commands.CLI;
-using DnsClient;
-using System.Linq;
-using System.Collections.Generic;
 using AngryWasp.Serializer;
-using System.IO;
+using System.Reflection;
 
 namespace EMS
 {
@@ -98,7 +94,7 @@ namespace EMS
             if (!Config.User.NoReconnect)
                 Client.ConnectToSeedNodes();
 
-            TimedEvents.Initialize();
+            TimedEventManager.RegisterEvents(Assembly.GetExecutingAssembly());
             Application.RegisterCommands();
             Application.Start();
         }

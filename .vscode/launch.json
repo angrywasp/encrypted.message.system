@@ -16,6 +16,7 @@
             "program": "${workspaceRoot}/Bin/Debug/netcoreapp3.1/EMS",
             "cwd": "${workspaceRoot}",
             "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
             "args":[
                 "--config-file", "${workspaceRoot}/../../../.ems/app.config",
                 "--no-reconnect"
@@ -28,6 +29,7 @@
             "program": "${workspaceRoot}/Bin/Debug/netcoreapp3.1/EMS",
             "cwd": "${workspaceRoot}",
             "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
             "args":[
                 "--p2p-port", "3501", 
                 "--rpc-port", "4501", 
@@ -41,6 +43,7 @@
             "program": "${workspaceRoot}/Bin/Debug/netcoreapp3.1/EMS",
             "cwd": "${workspaceRoot}/Bin",
             "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
             "args":[
                 "--p2p-port", "3502",
                 "--rpc-port", "4502", 
@@ -55,6 +58,7 @@
             "program": "${workspaceRoot}/Bin/Debug/netcoreapp3.1/EMS",
             "cwd": "${workspaceRoot}/Bin",
             "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
             "args":[
                 "--p2p-port", "3503", 
                 "--rpc-port", "4503", 
