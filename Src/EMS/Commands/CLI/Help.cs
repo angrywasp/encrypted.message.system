@@ -9,7 +9,12 @@ namespace EMS.Commands.CLI
         {
             Console.WriteLine();
             foreach (var cmd in Application.Commands)
-                Console.WriteLine($"{cmd.Key}: {cmd.Value.Item1}");
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write(cmd.Key);
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($": {cmd.Value.Item1}");
+            }
             return true;
         }
     }
