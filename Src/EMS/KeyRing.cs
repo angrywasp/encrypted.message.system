@@ -76,6 +76,11 @@ namespace EMS
             Application.PauseBufferedLog(false);
         }
 
+        public static void EraseKey()
+        {
+            privateKey = publicKey = null;
+        }
+
         public static byte[] CreateSharedKey(byte[] recipientPublicKey) => Ecc.CreateKeyAgreement(privateKey, recipientPublicKey);
 
         public static bool EncryptMessage(byte[] input, string base58RecipientAddress, out byte[] encryptionResult, out byte[] signature, out byte[] addressXor)

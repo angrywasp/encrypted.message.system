@@ -45,7 +45,9 @@ namespace EMS.Commands.CLI
             if (propName != "MessageExpiration" && propName != "KeyFile")
                 Log.WriteWarning("A restart is required for the changes to take effect");
 
-            if (propName == "KeyFile")
+            if (Config.User.RelayOnly)
+                KeyRing.EraseKey();
+            else
                 KeyRing.ReadKey();
 
             return true;
