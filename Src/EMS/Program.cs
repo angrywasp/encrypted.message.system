@@ -34,11 +34,15 @@ namespace EMS
             if (cmd["--rpc-ssl-port"] != null)
                 Config.User.RpcSslPort = ushort.Parse(cmd["--rpc-ssl-port"].Value);
 
+            if (cmd["--relay-only"] != null)
+                Config.User.RelayOnly = true;
+
             Config.Save();
 
             Log.Initialize();
             Log.WriteConsole($"EMS {Version.VERSION}: {Version.CODE_NAME}");
-            KeyRing.ReadKey();
+            if (!Config.User.RelayOnly)
+                KeyRing.ReadKey();
             Console.Clear();
             if (Environment.GetEnvironmentVariable("TERM").StartsWith("xterm")) 
                 Console.WriteLine("\x1b[3J");

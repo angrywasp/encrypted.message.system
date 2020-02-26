@@ -11,6 +11,12 @@ namespace EMS.Commands.CLI
     {
         public bool Handle(string command)
         {
+            if (Config.User.RelayOnly)
+            {
+                Log.WriteError($"Command not allowed with the --relay-only flag");
+                return false;
+            }
+            
             byte[] encryptedKeyData = File.ReadAllBytes(Config.User.KeyFile);
             string a = PasswordPrompt.Get("Enter your key file password");
             byte[] password = string.IsNullOrEmpty(a) ? Keccak.Hash128(HashKey16.Empty) : Keccak.Hash128(Encoding.ASCII.GetBytes(a));

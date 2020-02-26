@@ -59,5 +59,7 @@ namespace EMS
         public ushort RpcSslPort { get; set; } = Config.DEFAULT_RPC_SSL_PORT;
 
         public bool NoDnsSeeds { get; set; } = false;
+
+        public bool RelayOnly { get; set; } = false;
     }
 }

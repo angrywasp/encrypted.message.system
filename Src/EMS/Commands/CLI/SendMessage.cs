@@ -8,6 +8,12 @@ namespace EMS.Commands.CLI
     {
         public bool Handle(string command)
         {
+            if (Config.User.RelayOnly)
+            {
+                Log.WriteError($"Command not allowed with the --relay-only flag");
+                return false;
+            }
+            
             string address = Helpers.PopWord(ref command);
 
             HashKey16 key;
