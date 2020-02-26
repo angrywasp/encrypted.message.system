@@ -113,6 +113,7 @@ namespace EMS.Commands.P2P
             else
             {
                 int bytesRead = 0;
+                int newMessageCount = 0;
                 BinaryReader reader = new BinaryReader(new MemoryStream(d));
 
                 while (true)
@@ -162,6 +163,10 @@ namespace EMS.Commands.P2P
                         if (!MessagePool.Messages.TryAdd(messageKey, msg))
                             Log.WriteError($"Could not add message to the pool");
                     }
+
+                    ++newMessageCount;
+                    if (msg.IsDecrypted)
+                        Log.WriteConsole($"Received a message with key {msg.Key}");
                     
                     //validate the read proof and update if necessary
                     if (readProofNonce != HashKey16.Empty)
@@ -210,6 +215,8 @@ namespace EMS.Commands.P2P
                         }
                     }
                 }
+
+                Log.WriteConsole($"{newMessageCount} new messages added to the pool");
 
                 reader.Close();
             }
