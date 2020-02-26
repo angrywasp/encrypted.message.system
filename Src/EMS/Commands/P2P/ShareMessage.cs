@@ -36,15 +36,20 @@ namespace EMS.Commands.P2P
                 //already have it. skip. cause we already would have shared this the first time we got it
                 return; 
 
-            byte[] req = ShareMessage.GenerateRequest(true, d).ToArray();
+            byte[] request = ShareMessage.GenerateRequest(true, d).ToArray();
+
+            List<Connection> disconnected = new List<Connection>();
 
             ConnectionManager.ForEach(Direction.Incoming | Direction.Outgoing, (con) =>
             {
                 if (con.PeerId == h.PeerID)
                     return;
 
-                con.Write(req);
+                con.Write(request);
             });
+
+            foreach (var disc in disconnected)
+                ConnectionManager.Remove(disc);
         }
     }
 }

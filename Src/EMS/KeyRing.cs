@@ -156,15 +156,14 @@ namespace EMS
                 return null;
 
             HashKey16 readProofNonce = decrypted.Take(16).ToArray();
-            string message = Encoding.ASCII.GetString(decrypted.Skip(16).ToArray());
-
+            validatedMessage.MessageType = (Message_Type)decrypted[16];
+            validatedMessage.DecryptedData = decrypted.Skip(17).ToArray();
             validatedMessage.Address = Base58.Encode(a);
             validatedMessage.ReadProof = new ReadProof
             {
                 Nonce = readProofNonce,
                 Hash = readProofHash
             };
-            validatedMessage.DecryptedMessage = message;
 
             return validatedMessage;
         }

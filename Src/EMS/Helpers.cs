@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using AngryWasp.Net;
 using DnsClient;
 
 namespace EMS
@@ -47,6 +49,20 @@ namespace EMS
                 AngryWasp.Net.Config.AddSeedNode(host, port);
                 Log.WriteConsole($"Added seed node {host}:{port}");
             }
+        }
+
+        public static void MessageAll(byte[] request)
+        {
+            List<Connection> disconnected = new List<Connection>();
+
+            ConnectionManager.ForEach(Direction.Incoming | Direction.Outgoing, (c) =>
+            {
+                if (!c.Write(request))
+                    disconnected.Add(c);
+            });
+
+            foreach (var c in disconnected)
+                ConnectionManager.Remove(c);
         }
     }
 }

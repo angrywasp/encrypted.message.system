@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using AngryWasp.Helpers;
 using System;
 using System.Text;
 
@@ -27,13 +26,13 @@ namespace EMS.Commands.RPC
             ret.Response.Hash = message.Hash;
             ret.Response.Timestamp = message.Timestamp;
             ret.Response.Expiration = message.Expiration;
+            ret.Response.MessageVersion = message.MessageVersion;
+            ret.Response.MessageType = message.MessageType;  
 
             ret.Response.Direction = message.IsDecrypted ? (MessagePool.OutgoingMessages.Contains(message.Key) ? "out": "in") : string.Empty;
 
             if (message.ReadProof != null)
                 ret.Response.ReadProof = message.ReadProof;
-
-            //don't fill message.Data. It is a waste of bandwidth
 
             if (!message.IsDecrypted)
             {
@@ -42,7 +41,7 @@ namespace EMS.Commands.RPC
             }
 
             ret.Response.Address = message.Address;
-            ret.Response.Message = Convert.ToBase64String(Encoding.UTF8.GetBytes(message.DecryptedMessage));
+            ret.Response.Message = Convert.ToBase64String(message.DecryptedData);
 
             jsonResult = ret;
             return true;
@@ -67,6 +66,12 @@ namespace EMS.Commands.RPC
 
             [JsonProperty("expiration")]
             public uint Expiration { get; set; } = 0;
+
+            [JsonProperty("version")]
+            public byte MessageVersion { get; set; } = 0;
+
+            [JsonProperty("type")]
+            public Message_Type MessageType { get; set; } = Message_Type.Invalid;
 
             [JsonProperty("address")]
             public string Address { get; set; } = string.Empty;

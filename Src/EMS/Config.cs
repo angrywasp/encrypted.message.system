@@ -15,6 +15,8 @@ namespace EMS
         //Give messages a minimum life and enforce it to prevent spamming the network with short lived, low diff messages
         public const uint MIN_MESSAGE_EXPIRATION = 3600;
 
+        public const byte MESSAGE_VERSION = 0;
+
         public const string DEFAULT_KEY_FILE = "default.keys";
         public const string DEFAULT_CONFIG_FILE = "app.config";
 
@@ -56,6 +58,6 @@ namespace EMS
 
         public ushort RpcSslPort { get; set; } = Config.DEFAULT_RPC_SSL_PORT;
 
-        public bool NoReconnect { get; set; } = false;
+        public bool NoDnsSeeds { get; set; } = false;
     }
 }

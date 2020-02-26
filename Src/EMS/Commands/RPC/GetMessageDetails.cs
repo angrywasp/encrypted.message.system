@@ -22,7 +22,9 @@ namespace EMS.Commands.RPC
                     Expiration = m.Value.Expiration,
                     Address = m.Value.Address,
                     Read = isRead,
-                    Direction = direction
+                    Direction = direction,
+                    MessageVersion = m.Value.MessageVersion,
+                    MessageType = m.Value.MessageType                
                 });
             }
             
@@ -41,6 +43,12 @@ namespace EMS.Commands.RPC
 
             [JsonProperty("expiration")]
             public uint Expiration { get; set; } = 0;
+
+            [JsonProperty("version")]
+            public byte MessageVersion { get; set; } = 0;
+
+            [JsonProperty("type")]
+            public Message_Type MessageType { get; set; } = Message_Type.Invalid;
 
             [JsonProperty("address")]
             public string Address { get; set; } = string.Empty;

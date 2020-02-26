@@ -19,9 +19,10 @@ namespace EMS.Commands.CLI
             Console.ForegroundColor = ConsoleColor.DarkGreen;
             Console.WriteLine($"  From: {message.Address}");
             Console.WriteLine($"  Time: {DateTimeHelper.UnixTimestampToDateTime(message.Timestamp)}");
+            Console.WriteLine($"  Type: {message.MessageType} (Version {message.MessageVersion})");
             Console.WriteLine($"Expiry: {DateTimeHelper.UnixTimestampToDateTime(message.Timestamp + message.Expiration)}");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(message.DecryptedMessage);
+            Console.WriteLine(message.ParseDecryptedData());
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
 

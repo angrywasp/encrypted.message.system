@@ -8,16 +8,7 @@ namespace EMS.TimedEvents
     {
         public void Execute()
         {
-            List<Connection> disconnected = new List<Connection>();
-
-            ConnectionManager.ForEach(Direction.Incoming | Direction.Outgoing, (c) =>
-            {
-                if (!c.Write(AngryWasp.Net.ExchangePeerList.GenerateRequest(true).ToArray()))
-                    disconnected.Add(c);
-            });
-
-            foreach (Connection c in disconnected)
-                ConnectionManager.Remove(c);
+            Helpers.MessageAll(AngryWasp.Net.ExchangePeerList.GenerateRequest(true).ToArray());
         }
     }
 }

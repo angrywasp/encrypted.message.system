@@ -1,6 +1,5 @@
 using Newtonsoft.Json;
 using System;
-using System.Text;
 
 namespace EMS.Commands.RPC
 {
@@ -12,10 +11,10 @@ namespace EMS.Commands.RPC
             EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
             ret.Response = new JsonResponse();
 
-            string messageText = Encoding.UTF8.GetString(Convert.FromBase64String(r.Request.Message));
+            byte[] messageBytes = Convert.FromBase64String(r.Request.Message);
 
             HashKey16 key;
-            bool sent = MessagePool.Send(r.Request.Address, messageText, r.Request.Expiration, out key);
+            bool sent = MessagePool.Send(r.Request.Address, Message_Type.Text, messageBytes, r.Request.Expiration, out key);
             if (sent)
                 ret.Response.Key = key;
 

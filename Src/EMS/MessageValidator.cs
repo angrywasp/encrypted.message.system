@@ -11,8 +11,8 @@ namespace EMS
         {
             HashKey16 messageKey = HashKey16.Make(input);
             HashKey32 messageHash = HashKey32.Empty;
-            uint timestamp = 0;
-            uint expiration = 0;
+            uint timestamp = 0, expiration = 0;
+            byte messageVersion = Config.MESSAGE_VERSION;
 
             BinaryReader reader = new BinaryReader(new MemoryStream(input));
             reader.BaseStream.Seek(0, SeekOrigin.Begin);
@@ -24,6 +24,8 @@ namespace EMS
             timestamp = reader.ReadUInt32();
             //skip nonce, 4 bytes
             reader.BaseStream.Seek(4, SeekOrigin.Current);
+            //read message version
+            messageVersion = reader.ReadByte();
             //read expiration time
             expiration = reader.ReadUInt32();
 
@@ -39,12 +41,15 @@ namespace EMS
                 return null;
             }
 
+            if (messageVersion != Config.MESSAGE_VERSION)
+                Log.WriteWarning($"Message has incorrect version {messageVersion}. Current version is {Config.MESSAGE_VERSION}");
+
             uint adjustedExpiration = Math.Max(expiration, Config.MIN_MESSAGE_EXPIRATION);
 
             //the hash matches, but is it valid for the provided expiration time?
             if (!PowValidator.Validate(compare, adjustedExpiration * Config.DIFF_MULTIPLIER))
             {
-                Log.WriteError($"Message failed validation. Invalid expiration time, {compare}");
+                Log.WriteError($"Message failed validation. Invalid expiration time, {adjustedExpiration}");
                 return null;
             }
 
@@ -78,7 +83,7 @@ namespace EMS
 
             try
             {
-                return KeyRing.DecryptMessage(validatedMessage.Data.Skip(44).ToArray(), validatedMessage);
+                return KeyRing.DecryptMessage(validatedMessage.Data.Skip(45).ToArray(), validatedMessage);
             } 
             catch
             {

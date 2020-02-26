@@ -9,17 +9,7 @@ namespace EMS.Commands.CLI
     {
         public bool Handle(string command)
         {
-            List<Connection> disconnected = new List<Connection>();
-            
-            ConnectionManager.ForEach(Direction.Incoming | Direction.Outgoing, (c) =>
-            {
-                if (!c.Write(RequestMessagePool.GenerateRequest(true).ToArray()))
-                    disconnected.Add(c);
-            });
-
-            foreach (Connection c in disconnected)
-                ConnectionManager.Remove(c);
-                
+            Helpers.MessageAll(RequestMessagePool.GenerateRequest(true).ToArray());
             return true;
         }
     }

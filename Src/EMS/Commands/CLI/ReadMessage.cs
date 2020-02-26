@@ -3,9 +3,9 @@ using AngryWasp.Helpers;
 
 namespace EMS.Commands.CLI
 {
+    [ApplicationCommand("read", "Read a message. Usage: read <message_hash>")]
     public class ReadMessage : IApplicationCommand
     {
-        [ApplicationCommand("read", "Read a message. Usage: read <message_hash>")]
         public bool Handle(string command)
         {
             string hex = Helpers.PopWord(ref command);
@@ -54,9 +54,10 @@ namespace EMS.Commands.CLI
             Console.ForegroundColor = ConsoleColor.DarkGreen;
             Console.WriteLine($"{direction} {message.Address}");
             Console.WriteLine($"  Time: {DateTimeHelper.UnixTimestampToDateTime(message.Timestamp)}");
+            Console.WriteLine($"  Type: {message.MessageType} (Version {message.MessageVersion})");
             Console.WriteLine($"Expiry: {DateTimeHelper.UnixTimestampToDateTime(message.Timestamp + message.Expiration)}");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(message.DecryptedMessage);
+            Console.WriteLine(message.ParseDecryptedData());
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
             return true;

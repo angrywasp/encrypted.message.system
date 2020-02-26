@@ -135,7 +135,7 @@ namespace EMS.Commands.P2P
                     if (!MessagePool.Messages.TryGetValue(messageKey, out msg))
                     {
                         // This message is not in our local pool.
-                        if ((messageBody == null || messageBody.Length != messageLength))
+                        if (messageBody == null || messageBody.Length != messageLength)
                         {
                             // We were not provided with a full message
                             c.AddFailure();

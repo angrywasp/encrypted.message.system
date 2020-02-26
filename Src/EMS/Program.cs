@@ -66,9 +66,10 @@ namespace EMS
             RpcServer.RegisterCommand<Commands.RPC.GetMessage.JsonRequest>("get_message", GetMessage.Handle);
             RpcServer.RegisterCommand<Commands.RPC.SendMessage.JsonRequest>("send_message", Commands.RPC.SendMessage.Handle);
 
-            if (cmd["--no-reconnect"] != null)
-                Config.User.NoReconnect = true;
-            else if (cmd["--seed-nodes"] != null)
+            if (cmd["--no-dns-seeds"] != null)
+                Config.User.NoDnsSeeds = true;
+            
+            if (cmd["--seed-nodes"] != null)
             {
                 //todo: check for formatting errors
                 string[] nodes = cmd["--seed-nodes"].Value.Split(',', StringSplitOptions.RemoveEmptyEntries);
@@ -86,13 +87,13 @@ namespace EMS
                 }
             }
 
-            Helpers.AddSeedFromDns();
+            if (!Config.User.NoDnsSeeds)
+                Helpers.AddSeedFromDns();
 
             new Server().Start(Config.User.P2pPort);
             new RpcServer().Start(Config.User.RpcPort, Config.User.RpcSslPort);
 
-            if (!Config.User.NoReconnect)
-                Client.ConnectToSeedNodes();
+            Client.ConnectToSeedNodes();
 
             TimedEventManager.RegisterEvents(Assembly.GetExecutingAssembly());
             Application.RegisterCommands();

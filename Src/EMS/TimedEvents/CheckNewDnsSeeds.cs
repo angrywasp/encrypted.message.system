@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using AngryWasp.Net;
 
 namespace EMS.TimedEvents
@@ -8,7 +7,8 @@ namespace EMS.TimedEvents
     {
         public void Execute()
         {
-            Helpers.AddSeedFromDns();
+            if (!Config.User.NoDnsSeeds)
+                Helpers.AddSeedFromDns();
         }
     }
 }
