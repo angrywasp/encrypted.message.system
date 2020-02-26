@@ -7,7 +7,15 @@ namespace EMS
     public enum Message_Type : byte
     {
         Text = 0,
-        Invalid = 1
+        Binary = 1,
+        Invalid = 2
+    }
+
+    public enum Message_Direction : byte
+    {
+        None,
+        In,
+        Out
     }
 
     public class Message
@@ -19,11 +27,11 @@ namespace EMS
         public Message_Type MessageType { get; set; } = Message_Type.Invalid;
         public uint Timestamp { get; set; } = 0;
         public uint Expiration { get; set; } = 0;
-        public string Address { get; set; } =  string.Empty;
+        public string Address { get; set; } = string.Empty;
         public byte[] DecryptedData { get; set; } = null;
-
+        public Message_Direction Direction { get; set; } = Message_Direction.None;
         public ReadProof ReadProof { get; set; } = new ReadProof();
-        
+
         public bool IsDecrypted
         {
             get { return !string.IsNullOrEmpty(Address) && DecryptedData != null; }

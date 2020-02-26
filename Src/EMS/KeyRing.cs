@@ -122,30 +122,37 @@ namespace EMS
 
             ushort signatureLength = BitShifter.ToUShort(reader.ReadBytes(2));
             ushort encryptedMessageLength = BitShifter.ToUShort(reader.ReadBytes(2));
-            byte[] xorKey = reader.ReadBytes(65);
+            BitArray xorKey = new BitArray(reader.ReadBytes(65));
             HashKey32 readProofHash = reader.ReadBytes(32);
-            byte[] a = new byte[65];
+            byte[] xorResult = new byte[65];
 
             BitArray ba = new BitArray(publicKey);
-            BitArray bb = new BitArray(xorKey);
-            ba.Xor(bb);
-            ba.CopyTo(a, 0);
+            ba.Xor(xorKey);
+            ba.CopyTo(xorResult, 0);
     
             byte[] signature = reader.ReadBytes(signatureLength);
             byte[] encryptedMessage = reader.ReadBytes(encryptedMessageLength);
 
             reader.Close();
 
-            // Could not verify the message signature. It isn't ours
-            // So we just send it back
-            if (!Ecc.Verify(encryptedMessage, a, signature))
+            // If we can verify this against the xor result, it means it was validated 
+            // against a senders address making it an imcoming message
+            //
+            // If that fails, we try to validate it against our own public key. This would indicate it is an 
+            // outgoing message. We may need this in case we sync messages we previously sent from the pool
+            // i.e. if we restarted a node. Without this code the verification would fail and they would show as encrypted
+            if (Ecc.Verify(encryptedMessage, xorResult, signature))
+                validatedMessage.Direction = Message_Direction.In;
+            else if (Ecc.Verify(encryptedMessage, publicKey, signature))
+                validatedMessage.Direction = Message_Direction.Out;
+            else
                 return validatedMessage;
 
             byte[] decrypted = null;
 
             try
             {
-                decrypted = Aes.Decrypt(encryptedMessage, CreateSharedKey(a));
+                decrypted = Aes.Decrypt(encryptedMessage, CreateSharedKey(xorResult));
             }
             catch
             {
@@ -158,7 +165,7 @@ namespace EMS
             HashKey16 readProofNonce = decrypted.Take(16).ToArray();
             validatedMessage.MessageType = (Message_Type)decrypted[16];
             validatedMessage.DecryptedData = decrypted.Skip(17).ToArray();
-            validatedMessage.Address = Base58.Encode(a);
+            validatedMessage.Address = Base58.Encode(xorResult);
             validatedMessage.ReadProof = new ReadProof
             {
                 Nonce = readProofNonce,
