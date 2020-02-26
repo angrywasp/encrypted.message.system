@@ -2,7 +2,7 @@ using AngryWasp.Helpers;
 
 namespace EMS.Commands.CLI
 {
-    [ApplicationCommand("flag", "Mark a message as read. Usage: flag <message_hash>")]
+    [ApplicationCommand("mark_read", "Mark a message as read. Usage: flag <message_hash>")]
     public class MarkMessageRead : IApplicationCommand
     {
         public bool Handle(string command)
