@@ -42,7 +42,7 @@ namespace EMS.Commands.CLI
             Config.Save();
 
             // All other config options require a restart
-            if (propName != "MessageExpiration" && propName != "KeyFile")
+            if (propName != "MessageExpiration" && propName != "KeyFile" && propName != "RelayOnly")
                 Log.WriteWarning("A restart is required for the changes to take effect");
 
             if (Config.User.RelayOnly)
