@@ -9,6 +9,13 @@ namespace EMS.Commands.RPC
         {
             EMS.JsonRequest<JsonRequest> r = (EMS.JsonRequest<JsonRequest>)json;
             EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
+            if (Config.User.RelayOnly)
+            {
+                ret.Response = new JsonResponse();
+                jsonResult = ret;
+                return true;
+            }
+
             ret.Response = new JsonResponse
             {
                 PublicKey= Base58.Encode(KeyRing.PublicKey),
