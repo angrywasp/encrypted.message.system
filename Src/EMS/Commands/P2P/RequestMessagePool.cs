@@ -178,9 +178,8 @@ namespace EMS.Commands.P2P
                     if (readProofNonce != HashKey16.Empty)
                     {
                         HashKey32 readProofHash = ReadProof.GenerateHash(readProofNonce);
-                        HashKey32 compareReadProofHash = msg.ExtractReadProofHash();
-
-                        if (readProofHash != compareReadProofHash)
+                        
+                        if (readProofHash != msg.ExtractReadProofHash())
                         {
                             Log.WriteError($"Read proof for message {msg.Key} failed validation");
                             c.AddFailure();
