@@ -20,7 +20,7 @@ namespace EMS.Commands.P2P
             foreach (var m in MessagePool.Messages)
             {
                 message.AddRange(m.Key);
-                message.Add(m.Value.ReadProof != null && m.Value.ReadProof.IsRead ? (byte)1 : (byte)0);
+                message.Add(m.Value.ReadProof.IsRead ? (byte)1 : (byte)0);
             }
 
             return Header.Create(CODE, isRequest, (ushort)(MessagePool.Messages.Count * 17))
@@ -57,7 +57,7 @@ namespace EMS.Commands.P2P
 
                     if (hashes.ContainsKey(m.Key))
                     {
-                        byte comp = m.Value.ReadProof != null && m.Value.ReadProof.IsRead ? (byte)1 : (byte)0;
+                        byte comp = m.Value.ReadProof.IsRead ? (byte)1 : (byte)0;
 
                         // Skip. Read status matches or the incoming data says this message is read
                         if (hashes[m.Key] == comp || hashes[m.Key] == 1)
@@ -67,9 +67,7 @@ namespace EMS.Commands.P2P
                         sendPruned = false; // Requesting node does not have this message. Send full
 
                     HashKey16 readProofNonce = HashKey16.Empty;
-                    if (m.Value.ReadProof == null)
-                        Log.WriteError($"ReadProof is null for message {m.Key}");
-                    else if (m.Value.ReadProof.IsRead)
+                    if (m.Value.ReadProof.IsRead)
                         readProofNonce = m.Value.ReadProof.Nonce;
 
                     List<byte> entry = m.Key.ToList().Join(readProofNonce);
@@ -92,7 +90,11 @@ namespace EMS.Commands.P2P
                         List<byte> data = Header.Create(CODE, false, (ushort)payload.Count)
                             .Join(payload);
 
-                        c.Write(data.ToArray());
+                        if (!c.Write(data.ToArray()))
+                        {
+                            ConnectionManager.Remove(c);
+                            return;
+                        }
 
                         payload.Clear();
                         payload.AddRange(entry);
@@ -107,7 +109,11 @@ namespace EMS.Commands.P2P
                     List<byte> data = Header.Create(CODE, false, (ushort)payload.Count)
                         .Join(payload);
 
-                    c.Write(data.ToArray());
+                    if (!c.Write(data.ToArray()))
+                    {
+                        ConnectionManager.Remove(c);
+                        return;
+                    }
                 }
             }
             else
@@ -172,47 +178,22 @@ namespace EMS.Commands.P2P
                     if (readProofNonce != HashKey16.Empty)
                     {
                         HashKey32 readProofHash = ReadProof.GenerateHash(readProofNonce);
+                        HashKey32 compareReadProofHash = msg.ExtractReadProofHash();
 
-                        if (msg.ReadProof != null)
+                        if (readProofHash != compareReadProofHash)
                         {
-                            // Nonces don't match.
-                            if (readProofNonce != msg.ReadProof.Nonce)
-                            {
-                                Log.WriteError($"Read proof for message {msg.Key} failed validation. Mismatched nonce");
-                                c.AddFailure();
-                                continue;
-                            }
-
-                            // The resulting hash does not match the one in the decrypted message
-                            if (msg.ReadProof.Hash != readProofHash)
-                            {
-                                Log.WriteError($"Read proof for message {msg.Key} failed validation. Mismatched hash");
-                                c.AddFailure();
-                                continue;
-                            }
-
-                            // Read proof passed validation, but we already have that data which was added during decryption
-                            // So instead if we have received a read proof, we just flag this decrypted message as having been read previously
-
-                            msg.ReadProof.IsRead = true;
+                            Log.WriteError($"Read proof for message {msg.Key} failed validation");
+                            c.AddFailure();
+                            continue;
                         }
-                        else
+
+                        // Read proof passed verification. Add it to the message
+                        msg.ReadProof = new ReadProof
                         {
-                            // The resulting hash does not match the one extracted from the encrypted message
-                            if (msg.ExtractReadProofHash() != readProofHash)
-                            {
-                                Log.WriteError($"Read proof for message {msg.Key} failed validation");
-                                continue;
-                            }
-
-                            // Read proof passed verification. Add it to the message
-                            msg.ReadProof = new ReadProof
-                            {
-                                Nonce = readProofNonce,
-                                Hash = readProofHash,
-                                IsRead = true
-                            };
-                        }
+                            Nonce = readProofNonce,
+                            Hash = readProofHash,
+                            IsRead = true
+                        };
                     }
                 }
 
