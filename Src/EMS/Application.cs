@@ -94,7 +94,7 @@ namespace EMS
 
                     if (Log.Buffer.Count == 0 || logBufferPaused)
                     {
-                        Thread.Sleep(50);
+                        Thread.Sleep(250);
                         continue;
                     }
 
@@ -139,6 +139,7 @@ namespace EMS
                     if (!Console.KeyAvailable)
                     {
                         noPrompt = true;
+                        Thread.Sleep(100);
                         continue;
                     }
 
