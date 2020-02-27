@@ -61,5 +61,7 @@ namespace EMS
         public bool NoDnsSeeds { get; set; } = false;
 
         public bool RelayOnly { get; set; } = false;
+
+        public bool NoUserInput { get; set; } = false;
     }
 }

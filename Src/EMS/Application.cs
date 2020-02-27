@@ -117,12 +117,15 @@ namespace EMS
                         Console.WriteLine(m.Item2);
                     }
 
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.Write("> ");
-                    Console.Write(new string(enteredText.ToArray()));
+                    if (!Config.User.NoUserInput)
+                    {
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.Write("> ");
+                        Console.Write(new string(enteredText.ToArray()));
+                    }
                 }
             }));
-
+            
             Thread t1 = new Thread(new ThreadStart( () =>
             {
                 List<string> lines = new List<string>();
@@ -269,9 +272,14 @@ namespace EMS
             }));
 
             t0.Start();
-            t1.Start();
+
+            if (!Config.User.NoUserInput)
+                t1.Start();
+
             t0.Join();
-            t1.Join();
+
+            if (!Config.User.NoUserInput)
+                t1.Join();
         }
     }
 }

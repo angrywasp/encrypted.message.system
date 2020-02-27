@@ -37,6 +37,9 @@ namespace EMS
             if (cmd["--relay-only"] != null)
                 Config.User.RelayOnly = true;
 
+            if (cmd["--no-user-input"] != null)
+                Config.User.NoUserInput = true;
+
             Config.Save();
 
             Log.Initialize();
