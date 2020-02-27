@@ -1,6 +1,7 @@
 #!/bin/bash
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+export IP=127.0.0.1
 export PORT=4500
 
 function check_response()
@@ -49,7 +50,7 @@ function print_response_data
 
 function send_request()
 {
-    data=$(curl -s -w " %{http_code}" -X GET http://127.0.0.1:${PORT}/$1 \
+    data=$(curl -s -w " %{http_code}" -X GET http://${IP}:${PORT}/$1 \
     -d '{"api":1,"request":'$2'}' \
     -H 'Content-Type: application/json')
 
@@ -62,7 +63,7 @@ function send_request()
 
 function send_request_no_param()
 {
-    data=$(curl -s -w " %{http_code}" -X GET http://127.0.0.1:${PORT}/$1 \
+    data=$(curl -s -w " %{http_code}" -X GET http://${IP}:${PORT}/$1 \
     -d '{"api":1}' \
     -H 'Content-Type: application/json')
 

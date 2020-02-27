@@ -3,7 +3,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source ${dir}/_common
 
 address=$1
-message=$(echo "$2" | tr -d '"' | base64)
+message=$(echo "$2" | tr -d '"' | base64 -w 0)
 
 request='{"address":"'${address}'","message":"'${message}'"}'
 
