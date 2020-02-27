@@ -7,14 +7,16 @@ namespace EMS.Commands.RPC
     {
         public static bool Handle(object json, out object jsonResult)
         {
-            EMS.JsonRequest<JsonRequest> r = (EMS.JsonRequest<JsonRequest>)json;
-            EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
             if (Config.User.RelayOnly)
             {
-                ret.Response = new JsonResponse();
-                jsonResult = ret;
-                return true;
+                var j = new JsonResponseBase();
+                j.ErrorCode = 100;
+                jsonResult = j;
+                return false;
             }
+
+            EMS.JsonRequest<JsonRequest> r = (EMS.JsonRequest<JsonRequest>)json;
+            EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
 
             ret.Response = new JsonResponse
             {

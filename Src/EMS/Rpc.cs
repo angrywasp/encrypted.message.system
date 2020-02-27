@@ -28,6 +28,9 @@ namespace EMS
     {
         [JsonProperty("status")]
         public string Status { get; set; }
+
+        [JsonProperty("code")]
+        public uint ErrorCode { get; set; } = 0;
     }
 
     [JsonObject]

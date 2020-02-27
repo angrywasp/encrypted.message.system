@@ -2,18 +2,19 @@
 
 EMS contains a basic RPC interface for performing common tasks and integrating EMS into other services and frontends.
 
-All RPC functions return a consistent JSON formatted response, consisting of 2 root fields, `response` and `status`.  
+All RPC functions return a consistent JSON formatted response, consisting of 3 root fields, `response`,  `status` and `code`.  
 
 ``` json
 { 
    "response":{ 
       ...
    },
-   "status":"OK"
+   "status":"OK",
+   "code":0
 }
 ```
 
-The status field is either `OK` or `ERROR` depending on success or failure of the RPC request. In addition the RPC interface returns a http status code of 200 for success and 400 for failure. This provides 2 simple methods of checking if an RPC function has been successful. If returning http code 400 or JSON status `ERROR` the response should be discarded.
+The status field is either `OK` or `ERROR` depending on success or failure of the RPC request. In addition the RPC interface returns a http status code of 200 for success and 400 for failure. This provides 2 simple methods of checking if an RPC function has been successful. If returning http code 400 or JSON status `ERROR` the response should be discarded. Additionally, the `code` field returns a function specific RPC error code, or 0 in the case of no error.
 
 ## RPC functions
 
@@ -50,6 +51,10 @@ Returns the address currently in use by the node. [Bash example](./rpc-test/get_
 **Notes** 
 
 If `private` is set to false in the request, both `private` and `private_hex` response fields will be 0 length strings
+
+**Error Codes**
+
+- `100`: The node is configured with `--relay-only` and the node address is not available.
 
 ### **get_message_count**
 
@@ -110,7 +115,8 @@ Gets basic details of messages in the pool
       }
     ]
   },
-  "status": "OK"
+  "status": "OK",
+  "code": 0
 }
 ```
 
@@ -154,7 +160,8 @@ Retrieves a message to read. [Bash example](./rpc-test/get_message)
       "read": false
     }
   },
-  "status": "OK"
+  "status": "OK",
+  "code": 0
 }
 ```
 
@@ -192,7 +199,8 @@ Send a message to another user. [Bash example](./rpc-test/send_message)
     "response": {
         "result": "36774ad4af5018e7931419af91ad0bf5"
     },
-    "status": "OK"
+    "status": "OK",
+    "code": 0
 }
 ```
 
@@ -211,3 +219,8 @@ The [send_message](./rpc-test/send_message) function expects the message data a 
 
 This function can take some time to return. After sending the message, it must be hashed with the PoW hashing algorithm on the server side.  
 The function will return in due time when the process is complete.
+
+**Error Codes**
+
+- `100`: The node is configured with `--relay-only` and the node address is not available.  
+- `200`: Sending of the message failed for any reason.

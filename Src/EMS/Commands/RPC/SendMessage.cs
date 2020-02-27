@@ -7,6 +7,14 @@ namespace EMS.Commands.RPC
     {
         public static bool Handle(object json, out object jsonResult)
         {
+            if (Config.User.RelayOnly)
+            {
+                var j = new JsonResponseBase();
+                j.ErrorCode = 100;
+                jsonResult = j;
+                return false;
+            }
+
             EMS.JsonRequest<JsonRequest> r = (EMS.JsonRequest<JsonRequest>)json;
             EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
             ret.Response = new JsonResponse();
@@ -17,6 +25,8 @@ namespace EMS.Commands.RPC
             bool sent = MessagePool.Send(r.Request.Address, Message_Type.Text, messageBytes, r.Request.Expiration, out key);
             if (sent)
                 ret.Response.Key = key;
+            else
+                ret.ErrorCode = 200;
 
             jsonResult = ret;
             return sent;
