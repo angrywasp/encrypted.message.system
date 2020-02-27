@@ -11,7 +11,8 @@ namespace EMS
         {
             HashKey16 messageKey = HashKey16.Make(input);
             HashKey32 messageHash = HashKey32.Empty;
-            uint timestamp = 0, expiration = 0;
+            long timestamp = 0;
+            uint expiration = 0;
             byte messageVersion = Config.MESSAGE_VERSION;
 
             BinaryReader reader = new BinaryReader(new MemoryStream(input));
@@ -56,7 +57,7 @@ namespace EMS
             //FTL check, but only if we are verifying a message received through the ShareMessage p2p command
             //If we are receiving this via RequestMessagePool, we must skip this verification as we are pulling old
             //Messages and this check will in most cases fail
-            uint localTimestamp = (uint)DateTimeHelper.TimestampNow;
+            long localTimestamp = (long)DateTimeHelper.TimestampNow;
             uint variance = (uint)Math.Abs(timestamp - localTimestamp);
             if (verifyFtl && variance > Config.FTL)
             {
