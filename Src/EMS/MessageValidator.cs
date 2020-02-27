@@ -78,7 +78,7 @@ namespace EMS
                 Key = messageKey,
                 Hash = messageHash,
                 Data = input,
-                Timestamp = timestamp,
+                Timestamp = (uint)timestamp,
                 Expiration = expiration
             };
 
