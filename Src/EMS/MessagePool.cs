@@ -5,6 +5,7 @@ using System.Linq;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System;
+using AngryWasp.Cryptography;
 
 namespace EMS
 {
@@ -70,7 +71,7 @@ namespace EMS
             while(true)
             {
                 Buffer.BlockCopy(BitShifter.ToByte(x), 0, finalMessage, 0, 4);
-                messageHash = SlowHash.Hash(finalMessage).ToByte();
+                messageHash = Keccak.Hash256(finalMessage);
                 if (PowValidator.Validate(messageHash, difficulty))
                     break;
 

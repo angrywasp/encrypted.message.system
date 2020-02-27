@@ -8,6 +8,23 @@ using Newtonsoft.Json;
 
 namespace EMS
 {   
+    public class HashKey16JsonConverer : JsonConverter
+    {
+        public override bool CanConvert(Type objectType) => objectType == typeof(HashKey16);
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            HashKey16 hk = ((string)reader.Value).FromByteHex();
+            return hk;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            HashKey16 hk = (HashKey16)value;
+            writer.WriteValue(hk.ToString());
+        }
+    }
+
     [JsonConverter(typeof(HashKey16JsonConverer))]
     public struct HashKey16 : IReadOnlyList<byte>, IEquatable<HashKey16>, IEquatable<byte[]>
     {

@@ -24,7 +24,8 @@
                 "--key-file", "s.keys",
                 "--config-file", "s.config",
                 "--log-file", "s.log",
-                "--no-dns-seeds"
+                "--no-dns-seeds",
+                "--no-user-input"
             ]
         },
         {

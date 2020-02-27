@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using AngryWasp.Cryptography;
 using AngryWasp.Helpers;
 
 namespace EMS
@@ -33,7 +34,7 @@ namespace EMS
             reader.Close();
 
             //Hash the rest of the message
-            HashKey32 compare = SlowHash.Hash(input.Skip(36).ToArray());
+            HashKey32 compare = Keccak.Hash256(input.Skip(36).ToArray());
 
             //compare the provided hash with the result of our own hashing
             if (messageHash != compare)

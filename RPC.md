@@ -223,4 +223,4 @@ The function will return in due time when the process is complete.
 **Error Codes**
 
 - `100`: The node is configured with `--relay-only` and the node address is not available.  
-- `200`: Sending of the message failed for any reason.
+- `200`: Sending of the message failed for any other reason.
