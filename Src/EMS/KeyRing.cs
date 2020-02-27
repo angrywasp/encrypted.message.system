@@ -16,19 +16,20 @@ namespace EMS
         public static byte[] PrivateKey => privateKey;
         public static byte[] PublicKey => publicKey;
 
-        public static void ReadKey()
+        public static void ReadKey(string password = null)
         {
             if (!File.Exists(Config.User.KeyFile))
-                NewKey();
+                NewKey(password);
             else
             {
                 byte[] encryptedKeyData = File.ReadAllBytes(Config.User.KeyFile);
-                string a = PasswordPrompt.Get("Enter your key file password");
-                byte[] password = string.IsNullOrEmpty(a) ? Keccak.Hash128(HashKey16.Empty) : Keccak.Hash128(Encoding.ASCII.GetBytes(a));;
+                if (password == null)
+                    password = PasswordPrompt.Get("Enter your key file password");
+                byte[] passwordBytes = string.IsNullOrEmpty(password) ? Keccak.Hash128(HashKey16.Empty) : Keccak.Hash128(Encoding.ASCII.GetBytes(password));
                 
                 try
                 {
-                    privateKey = Aes.Decrypt(encryptedKeyData, password);
+                    privateKey = Aes.Decrypt(encryptedKeyData, passwordBytes);
                 }
                 catch
                 {
@@ -41,7 +42,7 @@ namespace EMS
             }
         }
 
-        public static void NewKey()
+        public static void NewKey(string password = null)
         {
             Application.PauseBufferedLog(true);
             //Create a new address
@@ -52,25 +53,32 @@ namespace EMS
             if (string.IsNullOrEmpty(Config.User.KeyFile))
                 return;
 
-            byte[] password = null;
-            while (true)
+            byte[] passwordBytes = null;
+
+            if (password == null)
             {
-                string a = PasswordPrompt.Get("Enter a password for your key file");
-                string b = PasswordPrompt.Get("Confirm your password");
-
-                if (a != b)
+                while (true)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Password do not match. Please try again");
-                    Console.ForegroundColor = ConsoleColor.White;
-                    continue;
+                    string a = PasswordPrompt.Get("Enter a password for your key file");
+                    string b = PasswordPrompt.Get("Confirm your password");
+
+                    if (a != b)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Password do not match. Please try again");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        continue;
+                    }
+
+                    passwordBytes = string.IsNullOrEmpty(a) ? Keccak.Hash128(HashKey16.Empty) : Keccak.Hash128(Encoding.ASCII.GetBytes(a));
+                    break;
                 }
-
-                password = string.IsNullOrEmpty(a) ? Keccak.Hash128(HashKey16.Empty) : Keccak.Hash128(Encoding.ASCII.GetBytes(a));
-                break;
             }
+            else
+                passwordBytes = Keccak.Hash128(Encoding.ASCII.GetBytes(password));
 
-            byte[] encryptedKeyData = Aes.Encrypt(privateKey, password);
+
+            byte[] encryptedKeyData = Aes.Encrypt(privateKey, passwordBytes);
 
             File.WriteAllBytes(Config.User.KeyFile, encryptedKeyData);
             Application.PauseBufferedLog(false);

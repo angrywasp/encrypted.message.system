@@ -84,12 +84,12 @@ namespace EMS
                             Console.Write("\r");
                             Console.Write(new string(' ', Console.BufferWidth));
                             Console.Write("\r");
-
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine(exitMessage);
-                            Console.ForegroundColor = ConsoleColor.White;
-                            break;
                         }
+
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(exitMessage);
+                        Console.ForegroundColor = ConsoleColor.White;
+                        break;
                     }
 
                     if (Log.Buffer.Count == 0 || logBufferPaused)
@@ -102,9 +102,7 @@ namespace EMS
                     var logMessages = Log.Buffer.ToArray();
                     Log.Buffer.Clear();
 
-                    int left = Console.CursorLeft;
-
-                    if (left != 0)
+                    if (Console.CursorLeft != 0)
                     {
                         Console.Write("\r");
                         Console.Write(new string(' ', Console.BufferWidth));

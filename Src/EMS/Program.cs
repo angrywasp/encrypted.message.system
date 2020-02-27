@@ -45,7 +45,7 @@ namespace EMS
             Log.Initialize();
             Log.WriteConsole($"EMS {Version.VERSION}: {Version.CODE_NAME}");
             if (!Config.User.RelayOnly)
-                KeyRing.ReadKey();
+                KeyRing.ReadKey(cmd["--password"] != null ? cmd["--password"].Value : null);
             Console.Clear();
             if (Environment.GetEnvironmentVariable("TERM").StartsWith("xterm")) 
                 Console.WriteLine("\x1b[3J");
