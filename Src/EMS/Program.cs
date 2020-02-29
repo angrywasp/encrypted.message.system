@@ -5,6 +5,8 @@ using EMS.Commands.P2P;
 using EMS.Commands.RPC;
 using AngryWasp.Serializer;
 using System.Reflection;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace EMS
 {
@@ -17,35 +19,16 @@ namespace EMS
 
             Console.Title = $"EMS {Version.VERSION}: {Version.CODE_NAME}";
             Serializer.Initialize();
-            Config.Initialize(cmd["--config-file"] != null ? cmd["--config-file"].Value : Config.DEFAULT_CONFIG_FILE);
-
-            if (cmd["--log-file"] != null)
-                Config.User.LogFile = cmd["--log-file"].Value;
-
-            if (cmd["--key-file"] != null)
-                Config.User.KeyFile = cmd["--key-file"].Value;
-
-            if (cmd["--p2p-port"] != null)
-                Config.User.P2pPort = ushort.Parse(cmd["--p2p-port"].Value);
-
-            if (cmd["--rpc-port"] != null)
-                Config.User.RpcPort = ushort.Parse(cmd["--rpc-port"].Value);
-
-            if (cmd["--rpc-ssl-port"] != null)
-                Config.User.RpcSslPort = ushort.Parse(cmd["--rpc-ssl-port"].Value);
-
-            if (cmd["--relay-only"] != null)
-                Config.User.RelayOnly = true;
-
-            if (cmd["--no-user-input"] != null)
-                Config.User.NoUserInput = true;
+            Config.Initialize(cmd["config-file"] != null ? cmd["config-file"].Value : Config.DEFAULT_CONFIG_FILE);
+            if (!ConfigMapper.Process(cmd))
+                return;
 
             Config.Save();
 
             Log.Initialize();
             Log.WriteConsole($"EMS {Version.VERSION}: {Version.CODE_NAME}");
             if (!Config.User.RelayOnly)
-                KeyRing.ReadKey(cmd["--password"] != null ? cmd["--password"].Value : null);
+                KeyRing.ReadKey(cmd["password"] != null ? cmd["password"].Value : null);
             Console.Clear();
             if (Environment.GetEnvironmentVariable("TERM").StartsWith("xterm")) 
                 Console.WriteLine("\x1b[3J");
@@ -73,25 +56,16 @@ namespace EMS
             RpcServer.RegisterCommand<Commands.RPC.GetMessage.JsonRequest>("get_message", GetMessage.Handle);
             RpcServer.RegisterCommand<Commands.RPC.SendMessage.JsonRequest>("send_message", Commands.RPC.SendMessage.Handle);
 
-            if (cmd["--no-dns-seeds"] != null)
-                Config.User.NoDnsSeeds = true;
-            
-            if (cmd["--seed-nodes"] != null)
+            foreach (var seedNode in Config.User.SeedNodes)
             {
-                //todo: check for formatting errors
-                string[] nodes = cmd["--seed-nodes"].Value.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                foreach (var n in nodes)
-                {
-                    string[] node = n.Split(':', StringSplitOptions.RemoveEmptyEntries);
-                    string host = node[0];
-                    ushort port = AngryWasp.Net.Config.DEFAULT_PORT;
-                    if (node.Length > 1)
-                        ushort.TryParse(node[1], out port);
+                string[] node = seedNode.Split(':', StringSplitOptions.RemoveEmptyEntries);
+                string host = node[0];
+                ushort port = AngryWasp.Net.Config.DEFAULT_PORT;
+                if (node.Length > 1)
+                    ushort.TryParse(node[1], out port);
 
-                    AngryWasp.Net.Config.AddSeedNode(host, port);
-
-                    Log.WriteConsole($"Added seed node {host}:{port}");
-                }
+                AngryWasp.Net.Config.AddSeedNode(host, port);
+                Log.WriteConsole($"Added seed node {host}:{port}");
             }
 
             if (!Config.User.NoDnsSeeds)
