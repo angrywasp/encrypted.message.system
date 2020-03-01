@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using AngryWasp.Net;
 
 namespace EMS.TimedEvents

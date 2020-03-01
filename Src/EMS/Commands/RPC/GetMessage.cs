@@ -1,6 +1,5 @@
 using Newtonsoft.Json;
 using System;
-using System.Text;
 
 namespace EMS.Commands.RPC
 {

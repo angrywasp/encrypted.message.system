@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using AngryWasp.Net;
 using EMS.Commands.P2P;
 
 namespace EMS.Commands.CLI

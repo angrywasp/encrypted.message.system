@@ -1,4 +1,3 @@
-
 using System.Text;
 
 namespace EMS.Commands.CLI

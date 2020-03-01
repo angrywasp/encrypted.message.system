@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,14 +33,10 @@ namespace EMS
         public const ushort DEFAULT_RPC_SSL_PORT = 4501;
 
         private static UserConfig user = null;
-        private static List<byte> messageCache = new List<byte>();
 
         private static string userConfigFile = DEFAULT_CONFIG_FILE;
-        private static string messageCacheFile = DEFAULT_CACHE_FILE;
 
         public static UserConfig User => user;
-
-        public static List<byte> MessageCache => messageCache;
 
         public static void Initialize(string file = DEFAULT_CONFIG_FILE)
         {
@@ -53,7 +50,6 @@ namespace EMS
 
         public static void Save() => new ObjectSerializer().Serialize(user, userConfigFile);
     }
-
 
     //Attribute to designate which properties can be used as CLI flags
     public class CommandLinePropertyAttribute : Attribute
@@ -221,6 +217,9 @@ namespace EMS
 
         [CommandLineProperty("key-file", "Path to the key file to use.")]
         public string KeyFile { get; set; } = Config.DEFAULT_KEY_FILE;
+
+        [CommandLineProperty("cache-file", "Path to the message cache file to use.")]
+        public string CacheFile { get; set; } = Config.DEFAULT_CACHE_FILE;
 
         [CommandLineProperty("p2p-port", "P2P port. Default 3500")]
         public ushort P2pPort { get; set; } = Config.DEFAULT_P2P_PORT;

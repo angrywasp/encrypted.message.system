@@ -6,13 +6,18 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System;
 using AngryWasp.Cryptography;
+using System.IO;
 
 namespace EMS
 {
     public static class MessagePool
     {
         private static ConcurrentDictionary<HashKey16, Message> messages = new ConcurrentDictionary<HashKey16, Message>();
+        private static ConcurrentBag<byte[]> messageCache = new ConcurrentBag<byte[]>();
+
         public static ConcurrentDictionary<HashKey16, Message> Messages => messages;
+
+        public static ConcurrentBag<byte[]> MessageCache => messageCache;
 
         public static Message LastReceivedMessage { get; set; } = null;
 
@@ -152,6 +157,20 @@ namespace EMS
             Helpers.MessageAll(req);
 
             return true;
+        }
+    
+        public static void AddMessageToCache(byte[] msg)
+        {
+            if (!Config.User.CacheIncoming)
+                return;
+
+            messageCache.Add(msg);
+
+            using (FileStream fs = new FileStream(Config.User.CacheFile, FileMode.Append))
+            {
+                fs.Write(BitShifter.ToByte(msg.Length));
+                fs.Write(msg);
+            }
         }
     }
 }

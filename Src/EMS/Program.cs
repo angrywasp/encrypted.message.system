@@ -5,8 +5,7 @@ using EMS.Commands.P2P;
 using EMS.Commands.RPC;
 using AngryWasp.Serializer;
 using System.Reflection;
-using System.Linq;
-using System.Collections.Generic;
+using System.IO;
 
 namespace EMS
 {
@@ -70,6 +69,9 @@ namespace EMS
 
             if (!Config.User.NoDnsSeeds)
                 Helpers.AddSeedFromDns();
+
+            if (Config.User.CacheIncoming)
+                File.Create(Config.User.CacheFile);
 
             new Server().Start(Config.User.P2pPort);
             new RpcServer().Start(Config.User.RpcPort, Config.User.RpcSslPort);

@@ -43,7 +43,8 @@
                 "--key-file", "n1.keys",
                 "--config-file", "n1.config",
                 "--log-file", "n1.log",
-                "--seed-nodes", "127.0.0.1:3500",
+                "--seed-node", "127.0.0.1:3500",
+                "--seed-node", "127.0.0.1:3501",
                 "--no-dns-seeds"
             ]
         },
@@ -62,8 +63,9 @@
                 "--key-file", "n2.keys",
                 "--config-file", "n2.config",
                 "--log-file", "n2.log",
-                "--seed-nodes", "127.0.0.1:3500",
-                "--no-dns-seeds"
+                "--seed-node", "127.0.0.1:3500",
+                "--seed-node", "127.0.0.1:3600",
+                "--no-dns-seeds", "--help"
             ]
         },
         {
