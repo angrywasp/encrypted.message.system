@@ -1,50 +1,57 @@
+using AngryWasp.Json.Rpc;
 using Newtonsoft.Json;
 using System;
 
 namespace EMS.Commands.RPC
 {
-    public class SendMessage
+    [JsonRpcServerCommand("send_message")]
+    public class SendMessage : IJsonRpcServerCommand
     {
-        public static bool Handle(object json, out object jsonResult)
+        public bool Handle(string requestString, out object responseObject)
         {
+            JsonRequest<Request> request = null;
+            responseObject = null;
+
             if (Config.User.RelayOnly)
             {
-                var j = new JsonResponseBase();
-                j.ErrorCode = 100;
-                jsonResult = j;
+                responseObject  = new JsonResponseBase() {
+                    ErrorCode = 100
+                };
+
                 return false;
             }
 
-            EMS.JsonRequest<JsonRequest> r = (EMS.JsonRequest<JsonRequest>)json;
-            EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
-            ret.Response = new JsonResponse();
+            if (!JsonRequest<Request>.Deserialize(requestString, out request))
+                return false;
 
-            byte[] messageBytes = Convert.FromBase64String(r.Request.Message);
+            JsonResponse<Response> response = new JsonResponse<Response>();
+
+            byte[] messageBytes = Convert.FromBase64String(request.Data.Message);
 
             HashKey16 key;
-            bool sent = MessagePool.Send(r.Request.Address, Message_Type.Text, messageBytes, r.Request.Expiration, out key);
+            bool sent = MessagePool.Send(request.Data.Address, Message_Type.Text, messageBytes, request.Data.Expiration, out key);
             if (sent)
-                ret.Response.Key = key;
+                response.Data.Key = key;
             else
-                ret.ErrorCode = 200;
+                response.ErrorCode = 200;
 
-            jsonResult = ret;
+            responseObject = response;
             return sent;
         }
 
-        public class JsonRequest
+        public class Request
         {
             [JsonProperty("address")]
-            public string Address { get; set; }
+            public string Address { get; set; } = string.Empty;
 
             [JsonProperty("message")]
-            public string Message { get; set; }
+            public string Message { get; set; } = string.Empty;
 
             [JsonProperty("expiration")]
             public uint Expiration { get; set; } = 3600;
         }
 
-        public class JsonResponse
+        public class Response
         {
             [JsonProperty("key")]
             public HashKey16 Key { get; set; } = HashKey16.Empty;

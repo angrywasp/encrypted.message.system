@@ -1,3 +1,4 @@
+using AngryWasp.Cli;
 using EMS.Commands.P2P;
 
 namespace EMS.Commands.CLI

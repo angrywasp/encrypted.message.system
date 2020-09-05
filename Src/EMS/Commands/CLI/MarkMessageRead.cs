@@ -1,3 +1,4 @@
+using AngryWasp.Cli;
 using AngryWasp.Helpers;
 
 namespace EMS.Commands.CLI

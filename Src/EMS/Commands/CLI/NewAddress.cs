@@ -1,3 +1,5 @@
+using AngryWasp.Cli;
+
 namespace EMS.Commands.CLI
 {
     [ApplicationCommand("new_address", "Discards your current address and creates a new one")]

@@ -1,32 +1,26 @@
+using AngryWasp.Json.Rpc;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace EMS.Commands.RPC
 {
-    public class GetMessageCount
+    [JsonRpcServerCommand("get_message_count")]
+    public class GetMessageCount : IJsonRpcServerCommand
     {
-        public static bool Handle(object json, out object jsonResult)
+        public bool Handle(string requestString, out object responseObject)
         {
             int total = MessagePool.Messages.Count;
-            int decrypted = 0;
+            int decrypted = MessagePool.Messages.Where(x => x.Value.IsDecrypted).Count();
 
-            foreach (var m in MessagePool.Messages)
-            {
-                if (m.Value.IsDecrypted)
-                    ++decrypted;
-            }
-            EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
-            ret.Response = new JsonResponse
-            {
-                Total = total,
-                Decrypted = decrypted
-            };
+            JsonResponse<Response> response = new JsonResponse<Response>();
+            response.Data.Total = total;
+            response.Data.Decrypted = decrypted;
 
-            jsonResult = ret;
-            
+            responseObject = response;
             return true;
         }
 
-        public class JsonResponse
+        public class Response
         {
             [JsonProperty("total")]
             public int Total { get; set; } = 0;

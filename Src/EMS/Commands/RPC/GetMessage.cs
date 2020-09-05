@@ -1,58 +1,61 @@
+using AngryWasp.Json.Rpc;
 using Newtonsoft.Json;
 using System;
 
 namespace EMS.Commands.RPC
 {
-    public class GetMessage
+    [JsonRpcServerCommand("get_message")]
+    public class GetMessage : IJsonRpcServerCommand
     {
-        public static bool Handle(object json, out object jsonResult)
+        public bool Handle(string requestString, out object responseObject)
         {
-            EMS.JsonRequest<JsonRequest> r = (EMS.JsonRequest<JsonRequest>)json;
-            EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
-            ret.Response = new JsonResponse();
+            JsonRequest<Request> request = null;
+            responseObject = null;
 
-            HashKey16 key = r.Request.Key;
+            if (!JsonRequest<Request>.Deserialize(requestString, out request))
+                return false;
+
+            JsonResponse<Response> response = new JsonResponse<Response>();
 
             Message message;
-
-            if (!MessagePool.Messages.TryGetValue(key, out message))
+            if (!MessagePool.Messages.TryGetValue(request.Data.Key, out message))
             {
-                jsonResult = ret;
+                responseObject = response;
                 return false;
             }
 
-            ret.Response.Key = message.Key;
-            ret.Response.Hash = message.Hash;
-            ret.Response.Timestamp = message.Timestamp;
-            ret.Response.Expiration = message.Expiration;
-            ret.Response.MessageVersion = message.MessageVersion;
-            ret.Response.MessageType = message.MessageType;  
+            response.Data.Key = message.Key;
+            response.Data.Hash = message.Hash;
+            response.Data.Timestamp = message.Timestamp;
+            response.Data.Expiration = message.Expiration;
+            response.Data.MessageVersion = message.MessageVersion;
+            response.Data.MessageType = message.MessageType;  
 
-            ret.Response.Direction = message.Direction.ToString().ToLower();
+            response.Data.Direction = message.Direction.ToString().ToLower();
 
             if (message.ReadProof != null)
-                ret.Response.ReadProof = message.ReadProof;
+                response.Data.ReadProof = message.ReadProof;
 
             if (!message.IsDecrypted)
             {
-                jsonResult = ret;
+                responseObject = response;
                 return true;
             }
 
-            ret.Response.Address = message.Address;
-            ret.Response.Message = Convert.ToBase64String(message.DecryptedData);
+            response.Data.Address = message.Address;
+            response.Data.Message = Convert.ToBase64String(message.DecryptedData);
 
-            jsonResult = ret;
+            responseObject = response;
             return true;
         }
 
-        public class JsonRequest
+        public class Request
         {
             [JsonProperty("key")]
-            public HashKey16 Key { get; set; }
+            public HashKey16 Key { get; set; } = HashKey16.Empty;
         }
 
-        public class JsonResponse
+        public class Response
         {
             [JsonProperty("key")]
             public HashKey16 Key { get; set; } = HashKey16.Empty;

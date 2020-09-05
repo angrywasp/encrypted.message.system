@@ -1,47 +1,50 @@
 using Newtonsoft.Json;
 using AngryWasp.Helpers;
+using AngryWasp.Json.Rpc;
 
-namespace EMS.Commands.RPC
+namespace EMS.Commands.Rpc
 {
-    public class GetAddress
+    [JsonRpcServerCommand("get_address")]
+    public class GetAddress : IJsonRpcServerCommand
     {
-        public static bool Handle(object json, out object jsonResult)
+        public bool Handle(string requestString, out object responseObject)
         {
+            JsonRequest<Request> request = null;
+            responseObject = null;
+
             if (Config.User.RelayOnly)
             {
-                var j = new JsonResponseBase();
-                j.ErrorCode = 100;
-                jsonResult = j;
+                responseObject  = new JsonResponseBase() {
+                    ErrorCode = 100
+                };
+
                 return false;
             }
 
-            EMS.JsonRequest<JsonRequest> r = (EMS.JsonRequest<JsonRequest>)json;
-            EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
+            if (!JsonRequest<Request>.Deserialize(requestString, out request))
+                return false;
 
-            ret.Response = new JsonResponse
-            {
-                PublicKey= Base58.Encode(KeyRing.PublicKey),
-                PublicKeyHex = KeyRing.PublicKey.ToHex()
-            };
+            JsonResponse<Response> response = new JsonResponse<Response>();
+            response.Data.PublicKey = Base58.Encode(KeyRing.PublicKey);
+            response.Data.PublicKeyHex = KeyRing.PublicKey.ToHex();
 
-            if (r.Request.Private)
+            if (request.Data.Private)
             {
-                ret.Response.PrivateKey = Base58.Encode(KeyRing.PrivateKey);
-                ret.Response.PrivateKeyHex = KeyRing.PrivateKey.ToHex();
+                response.Data.PrivateKey = Base58.Encode(KeyRing.PrivateKey);
+                response.Data.PrivateKeyHex = KeyRing.PrivateKey.ToHex();
             }
 
-            jsonResult = ret;
-
+            responseObject = response;
             return true;
         }
 
-        public class JsonRequest
+        public class Request
         {
             [JsonProperty("private")]
             public bool Private { get; set; } = false;
         }
 
-        public class JsonResponse
+        public class Response
         {
             [JsonProperty("public")]
             public string PublicKey { get; set; } = string.Empty;

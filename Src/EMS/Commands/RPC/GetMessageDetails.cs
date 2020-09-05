@@ -1,34 +1,30 @@
+using AngryWasp.Json.Rpc;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace EMS.Commands.RPC
 {
-    public class GetMessageDetails
+    [JsonRpcServerCommand("get_message_details")]
+    public class GetMessageDetails : IJsonRpcServerCommand
     {
-        public static bool Handle(object json, out object jsonResult)
+        public bool Handle(string requestString, out object responseObject)
         {
-            EMS.JsonResponse<JsonResponse> ret = new EMS.JsonResponse<JsonResponse>();
-            ret.Response = new JsonResponse();
+            JsonResponse<Response> response = new JsonResponse<Response>();
 
             foreach (var m in MessagePool.Messages)
-            {
-                bool isRead = m.Value.ReadProof != null && m.Value.ReadProof.IsRead;
-
-                ret.Response.Details.Add(new MessageDetail
+                response.Data.Details.Add(new MessageDetail
                 {
                     Key = m.Key,
                     Timestamp = m.Value.Timestamp,
                     Expiration = m.Value.Expiration,
                     Address = m.Value.Address,
-                    Read = isRead,
+                    Read = m.Value.ReadProof != null && m.Value.ReadProof.IsRead,
                     Direction = m.Value.Direction.ToString().ToLower(),
                     MessageVersion = m.Value.MessageVersion,
                     MessageType = m.Value.MessageType                
                 });
-            }
             
-            jsonResult = ret;
-            
+            responseObject = response;
             return true;
         }
 
@@ -59,7 +55,7 @@ namespace EMS.Commands.RPC
             public string Direction { get; set; } = string.Empty;
         }
 
-        public class JsonResponse
+        public class Response
         {
             [JsonProperty("details")]
             public List<MessageDetail> Details { get; set; } = new List<MessageDetail>();

@@ -15,5 +15,7 @@
     <PackageReference Include="AngryWasp.Net" Version="*"/>
     <PackageReference Include="AngryWasp.Cryptography" Version="*"/>
     <PackageReference Include="AngryWasp.Serializer" Version="*"/>
+    <PackageReference Include="AngryWasp.Cli" Version="*"/>
+    <PackageReference Include="AngryWasp.Json.Rpc" Version="*"/>
   </ItemGroup>
 </Project>

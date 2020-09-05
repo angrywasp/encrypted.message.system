@@ -1,3 +1,5 @@
+using AngryWasp.Cli;
+
 namespace EMS.Commands.CLI
 {
     [ApplicationCommand("prune_peers", "Ping all nodes and remove dead connections")]

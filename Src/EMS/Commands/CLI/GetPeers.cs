@@ -1,6 +1,7 @@
+using AngryWasp.Cli;
+using AngryWasp.Net;
 using System;
 using System.Collections.Generic;
-using AngryWasp.Net;
 
 namespace EMS.Commands.CLI
 {
