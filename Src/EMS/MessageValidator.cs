@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using AngryWasp.Cli;
 using AngryWasp.Cryptography;
 using AngryWasp.Helpers;
 

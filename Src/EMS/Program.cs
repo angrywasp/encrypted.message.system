@@ -6,20 +6,24 @@ using EMS.Commands.RPC;
 using AngryWasp.Serializer;
 using System.Reflection;
 using System.IO;
+using AngryWasp.Cli;
+using AngryWasp.Cli.Args;
+using AngryWasp.Cli.DefaultCommands;
+using AngryWasp.Json.Rpc;
 
 namespace EMS
 {
     public static class MainClass
     {
         [STAThread]
-        public static void Main(string[] args)
+        public static void Main(string[] rawArgs)
         {
-            CommandLineParser cmd = CommandLineParser.Parse(args);
+            Arguments args = Arguments.Parse(rawArgs);
 
             Console.Title = $"EMS {Version.VERSION}: {Version.CODE_NAME}";
             Serializer.Initialize();
-            Config.Initialize(cmd["config-file"] != null ? cmd["config-file"].Value : Config.DEFAULT_CONFIG_FILE);
-            if (!ConfigMapper.Process(cmd))
+            Config.Initialize(args["config-file"] != null ? args["config-file"].Value : Config.DEFAULT_CONFIG_FILE);
+            if (!ConfigMapper.Process(args))
                 return;
 
             Config.Save();
@@ -27,11 +31,9 @@ namespace EMS
             Log.Initialize();
             Log.WriteConsole($"EMS {Version.VERSION}: {Version.CODE_NAME}");
             if (!Config.User.RelayOnly)
-                KeyRing.ReadKey(cmd["password"] != null ? cmd["password"].Value : null);
-            Console.Clear();
-            if (Environment.GetEnvironmentVariable("TERM").StartsWith("xterm")) 
-                Console.WriteLine("\x1b[3J");
-            Console.CursorTop = 0;
+                KeyRing.ReadKey(args["password"] != null ? args["password"].Value : null);
+
+            new Clear().Handle(null);
             
             CommandCode.AddExternalHandler((b) =>
             {
@@ -48,12 +50,6 @@ namespace EMS
             CommandProcessor.RegisterCommand(ShareMessageRead.CODE, ShareMessageRead.GenerateResponse);
             CommandProcessor.RegisterCommand(RequestMessagePool.CODE, RequestMessagePool.GenerateResponse);
             CommandProcessor.RegisterDefaultCommands();
-
-            RpcServer.RegisterCommand<Commands.RPC.GetAddress.JsonRequest>("get_address", Commands.RPC.GetAddress.Handle);
-            RpcServer.RegisterCommand<object>("get_message_count", GetMessageCount.Handle);
-            RpcServer.RegisterCommand<object>("get_message_details", GetMessageDetails.Handle);
-            RpcServer.RegisterCommand<Commands.RPC.GetMessage.JsonRequest>("get_message", GetMessage.Handle);
-            RpcServer.RegisterCommand<Commands.RPC.SendMessage.JsonRequest>("send_message", Commands.RPC.SendMessage.Handle);
 
             foreach (var seedNode in Config.User.SeedNodes)
             {
@@ -74,7 +70,10 @@ namespace EMS
                 File.Create(Config.User.CacheFile);
 
             new Server().Start(Config.User.P2pPort);
-            new RpcServer().Start(Config.User.RpcPort, Config.User.RpcSslPort);
+
+            JsonRpcServer server = new JsonRpcServer(Config.User.RpcPort);
+            server.RegisterCommands();
+            server.Start();
 
             Client.ConnectToSeedNodes();
 

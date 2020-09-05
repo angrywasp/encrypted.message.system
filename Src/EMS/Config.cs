@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
-using AngryWasp.Helpers;
+using AngryWasp.Cli.Args;
 using AngryWasp.Serializer;
 
 namespace EMS
@@ -88,7 +87,7 @@ namespace EMS
         private static Dictionary<string, Tuple<CommandLinePropertyAttribute, PropertyInfo>> map = 
             new Dictionary<string, Tuple<CommandLinePropertyAttribute, PropertyInfo>>();
 
-        public static bool Process(CommandLineParser cmd)
+        public static bool Process(Arguments arguments)
         {
             foreach (var p in typeof(UserConfig).GetProperties())
             {
@@ -99,32 +98,32 @@ namespace EMS
                 map.Add(a.Flag, new Tuple<CommandLinePropertyAttribute, PropertyInfo>(a, p));
             }
 
-            while (cmd.Count > 0)
+            while (arguments.Count > 0)
             {
-                CommandLineParserOption opt = cmd.Pop();
-                if (opt.Flag == null)
+                Argument arg = arguments.Pop();
+                if (arg.Flag == null)
                     continue;
 
-                if (opt.Flag == "help")
+                if (arg.Flag == "help")
                 {
                     ShowHelp();
                     return false;
                 }
 
-                if (IgnoreListContains(opt.Flag))
+                if (IgnoreListContains(arg.Flag))
                     continue;
                 
                 //provided a flag wrong
-                if (!map.ContainsKey(opt.Flag))
+                if (!map.ContainsKey(arg.Flag))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"No flag matches {opt.Flag}");
+                    Console.WriteLine($"No flag matches {arg.Flag}");
                     Console.ForegroundColor = ConsoleColor.White;
                     ShowHelp();
                     return false;
                 }
 
-                var dat = map[opt.Flag];
+                var dat = map[arg.Flag];
 
                 //boolean flags do not need a value
                 if (dat.Item2.PropertyType == typeof(bool))
@@ -134,19 +133,19 @@ namespace EMS
                 }
 
                 //check we have a value if the flag expects a value
-                if (string.IsNullOrEmpty(opt.Value))
+                if (string.IsNullOrEmpty(arg.Value))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"No value provided for flag {opt.Flag}");
+                    Console.WriteLine($"No value provided for flag {arg.Flag}");
                     Console.ForegroundColor = ConsoleColor.White;
                     ShowHelp();
                     return false;
                 }
 
-                if (!Parse(dat, opt))
+                if (!Parse(dat, arg))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Could not parse value for flag {opt.Flag}");
+                    Console.WriteLine($"Could not parse value for flag {arg.Flag}");
                     Console.ForegroundColor = ConsoleColor.White;
                     ShowHelp();
                     return false;
@@ -156,13 +155,13 @@ namespace EMS
             return true;
         }
 
-        private static bool Parse(Tuple<CommandLinePropertyAttribute, PropertyInfo> dat, CommandLineParserOption opt)
+        private static bool Parse(Tuple<CommandLinePropertyAttribute, PropertyInfo> dat, Argument arg)
         {
             if (dat.Item2.PropertyType.IsGenericType)
             {
                 try
                 {
-                    object obj = Serializer.Deserialize(dat.Item2.PropertyType.GenericTypeArguments[0], opt.Value);
+                    object obj = Serializer.Deserialize(dat.Item2.PropertyType.GenericTypeArguments[0], arg.Value);
                     object instance = dat.Item2.GetValue(Config.User);
                     dat.Item2.PropertyType.GetMethod("Add").Invoke(instance, new object[] { obj });
                     return true;
@@ -173,7 +172,7 @@ namespace EMS
             {
                 try
                 {
-                    object obj = Serializer.Deserialize(dat.Item2.PropertyType, opt.Value);
+                    object obj = Serializer.Deserialize(dat.Item2.PropertyType, arg.Value);
                     dat.Item2.SetValue(Config.User, obj);
                     return true;
                 }
@@ -226,9 +225,6 @@ namespace EMS
 
         [CommandLineProperty("rpc-port", "RPC port. Default 4500")]
         public ushort RpcPort { get; set; } = Config.DEFAULT_RPC_PORT;
-
-        [CommandLineProperty("rpc-ssl-port", "RPC SSL port. Default 4501")]
-        public ushort RpcSslPort { get; set; } = Config.DEFAULT_RPC_SSL_PORT;
 
         [CommandLineProperty("no-dns-seeds", "Do not fetch seed nodes from DNS")]
         public bool NoDnsSeeds { get; set; } = false;
