@@ -38,7 +38,7 @@ namespace EMS
             {
                 string txt = ((DnsClient.Protocol.TxtRecord)r).Text.ToArray()[0];
 
-                string[] node = txt.Split(':', StringSplitOptions.RemoveEmptyEntries);
+                string[] node = txt.Split(new char[] { ':'}, StringSplitOptions.RemoveEmptyEntries);
                 string host = node[0];
                 ushort port = AngryWasp.Net.Config.DEFAULT_PORT;
                 if (node.Length > 1)

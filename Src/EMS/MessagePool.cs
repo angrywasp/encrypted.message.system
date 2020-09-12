@@ -169,8 +169,8 @@ namespace EMS
 
             using (FileStream fs = new FileStream(Config.User.CacheFile, FileMode.Append))
             {
-                fs.Write(BitShifter.ToByte(msg.Length));
-                fs.Write(msg);
+                fs.Write(BitShifter.ToByte(msg.Length), 0, 4);
+                fs.Write(msg, 0, msg.Length);
             }
         }
     }

@@ -53,7 +53,7 @@ namespace EMS
 
             foreach (var seedNode in Config.User.SeedNodes)
             {
-                string[] node = seedNode.Split(':', StringSplitOptions.RemoveEmptyEntries);
+                string[] node = seedNode.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
                 string host = node[0];
                 ushort port = AngryWasp.Net.Config.DEFAULT_PORT;
                 if (node.Length > 1)
